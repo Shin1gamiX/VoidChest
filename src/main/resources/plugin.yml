@@ -1,0 +1,22 @@
+# ##################################################################################
+#                                                                                  #
+# __      ______ _____ _____   _____ _    _ ______  _____ _______                  #
+# \ \    / / __ \_   _|  __ \ / ____| |  | |  ____|/ ____|__   __|                 #
+#  \ \  / / |  | || | | |  | | |    | |__| | |__  | (___    | |                    # 
+#   \ \/ /| |  | || | | |  | | |    |  __  |  __|  \___ \   | |                    #
+#    \  / | |__| || |_| |__| | |____| |  | | |____ ____) |  | |                    #
+#     \/   \____/_____|_____/ \_____|_|  |_|______|_____/   |_|                    #
+#                                                                                  #
+# ##################################################################################
+
+name: ${project.name}
+author: Shin1gamiX
+version: ${project.version}
+description: ${project.description}
+main: me.shin1gamix.voidchest.VoidChestPlugin
+softdepend: [Vault, Multiverse-Core, HolographicDisplays, ShopGUIPlus, Essentials]
+api-version: 1.13
+commands:
+  voidchest:
+    description: The main command for voidchest.
+    aliases: [vc, vchest, voidc]

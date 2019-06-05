@@ -1,0 +1,141 @@
+# ##################################################################################
+#                                                                                  #
+# __      ______ _____ _____   _____ _    _ ______  _____ _______                  #
+# \ \    / / __ \_   _|  __ \ / ____| |  | |  ____|/ ____|__   __|                 #
+#  \ \  / / |  | || | | |  | | |    | |__| | |__  | (___    | |                    # 
+#   \ \/ /| |  | || | | |  | | |    |  __  |  __|  \___ \   | |                    #
+#    \  / | |__| || |_| |__| | |____| |  | | |____ ____) |  | |                    #
+#     \/   \____/_____|_____/ \_____|_|  |_|______|_____/   |_|                    #
+#                                                                                  #
+# ##################################################################################
+ 
+
+# ##################################################################################
+#
+# These sounds are played every time the player does something specific or
+# whenever a certain action is done such as whenever a voidchest sells items.
+#
+# If no valid sound is found for any of these, no sound will be played at all.
+#
+# ##################################################################################
+Sounds:
+  voidchest-sell: LEVEL_UP
+  voidchest-place: LEVEL_UP
+  voidchest-break: ANVIL_BREAK
+
+
+
+
+# ##################################################################################
+#
+# These messages are sent every time the player does a certain action.
+# An example would be whenever the player breaks a voidchest, places etc.
+#
+# ##################################################################################
+Messages:
+  voidchest-break:
+    enabled: true
+    message: '&7&l(!) &7You have successfuly &cbroken &7a voidchest!'
+  voidchest-place:
+    enabled: true
+    message: '&7&l(!) &7You have successfuly &aplaced &7a voidchest!'
+  voidchest-break-fail:
+    enabled: true
+    message:
+    - '&c&l(!) &cYou cannot break &4%player%&c''s Void Chest.'
+    - '&cYou can only break your own.'
+
+
+
+# ##################################################################################
+#
+# Limit how many voidchests a player can place.
+# Bypass permission is: 'voidchest.bypass'
+#
+# ##################################################################################
+Player:
+  voidchest:
+    limit: 5
+
+
+
+
+
+# ##################################################################################
+#
+# The amount of seconds the plugin should attempt to save all voidchests in file.
+# This is to ensure that in case of a crash, voidchest (statistics and etc) are not lost.
+#
+# In order to disable, set 'enabled' to false.
+# If you are having performance issues either set the task to 'async' 
+# or increase the interval.
+#
+# The interval is being run in seconds.
+#
+# ##################################################################################
+Saving:
+  interval: 45
+  enabled: true
+
+
+
+# ##################################################################################
+#
+# The amount of ticks the plugin should attempt to purge broken voidchests ingame. This is to ensure that
+# if a voidchest is broken by an explosion or third party plugins, all data related to this voidchest are removed.
+#
+# 20 ticks being 1 second. 10 ticks being 0.5 seconds and so on.
+# 100 ticks (default) being 5 seconds.
+#
+# This task is run sync (in the main thread).
+#
+# The interval is being run in ticks.
+#
+# ##################################################################################
+Purging:
+  interval: 100 
+
+
+# ##################################################################################
+#
+# ignore-item-meta explanation: should the item meta be ignored? If this is set to
+# false, if an item has any item meta (lore, enchant, etc), it will not be considered
+# as a sellable and will be removed if you have the purge option to true.
+#
+# The interval is being run in seconds.
+#
+# The mode is the prefered sell logic you'd like the plugin to use so as to choose
+# the sell prices for items. 
+# 
+# In case of ShopGUIPlus, it will select the first available
+# similar item that has a sell price from ShopGUIPlus's shop.
+#
+# In case of VoidChest, it chooses prices depending on the shop.yml file.
+#
+# Same thing for essentials, I think this part is covered.
+#
+# As for custom, in order to use this you'll have to create your own plugin that
+# implements a specific interface and then apply that class on startup. This way,
+# if you have the mode as "custom", your custom's plugin sell logic should be applied.
+#
+# ##################################################################################
+Sell:
+  interval: 15
+  mode: voidchest
+  ShopGUIPlus: 
+    ignore-item-meta: false
+  VoidChest: 
+    ignore-item-meta: false
+  Essentials: 
+    ignore-item-meta: false
+
+# ##################################################################################
+#
+# Auto-update: Should you get notified through the console every 2 hours?
+# Please do keep this true, updates are important and you should keep track of them.
+#
+# Debugging: Should the plugin print useful messages in console?
+#
+# ##################################################################################
+Auto-update: true
+Debugging: false
