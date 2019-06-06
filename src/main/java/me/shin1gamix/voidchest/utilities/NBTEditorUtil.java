@@ -19,7 +19,7 @@ import com.mojang.authlib.GameProfile;
  * @version 6.5
  * @author BananaPuncher714
  */
-public class NBTEditor {
+public class NBTEditorUtil {
 	private static final Map<String, Class<?>> classCache;
 	private static final Map<String, Method> methodCache;
 	private static final Map<Class<?>, Constructor<?>> constructorCache;

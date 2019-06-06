@@ -6,6 +6,9 @@ import java.util.Optional;
 
 import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.configuration.FileManager;
+import me.shin1gamix.voidchest.data.PlayerData;
+import me.shin1gamix.voidchest.data.PlayerDataManager;
+import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 import me.shin1gamix.voidchest.ecomanager.VoidMode;
 
 public class MetricsHandler {
@@ -18,32 +21,15 @@ public class MetricsHandler {
 		this.core = core;
 	}
 
-	private int getAmount(MetricOption mo) {
-		return (int) core.getPlayerDataManager().getPlayerDatas().values().stream()
-				.flatMap(data -> data.getVoidStorages().stream()).filter(chest -> {
-					switch (mo) {
-					case AUTO_SELL:
-						return chest.isAutoSell();
-					case HOLOGRAM:
-						return chest.isHologramActivated();
-					case PURGE:
-						return chest.isPurgeInvalidItems();
-					default:
-						return false;
-					}
-				}).count();
-	}
-
-	private enum MetricOption {
-		PURGE, AUTO_SELL, HOLOGRAM;
-	}
-	
 	public void setupMetrics() {
 		if (registered) {
 			throw new IllegalArgumentException("Metrics can only be registered once!");
 		}
-		Metrics metrics = new Metrics(this.core);
+
 		registered = true;
+
+		final Metrics metrics = new Metrics(this.core);
+
 		metrics.addCustomChart(new Metrics.SimplePie("modes", () -> {
 			final Optional<VoidMode> optional = VoidMode
 					.getByName(FileManager.getInstance().getOptions().getFile().getString("Sell.mode"));
@@ -53,12 +39,30 @@ public class MetricsHandler {
 			return VoidMode.CRAFT_VOIDCHEST.getName();
 		}));
 
+		int purges = 0;
+		int sell = 0;
+		int holo = 0;
+		for (final PlayerData data : PlayerDataManager.getInstance().getPlayerDatas().values()) {
+			for (final VoidStorage storage : data.getVoidStorages()) {
+				if (storage.isAutoSell())
+					++sell;
+				if (storage.isHologramActivated())
+					++holo;
+				if (storage.isPurgeInvalidItems())
+					++purges;
+			}
+		}
+
+		final int purgeRes = purges;
+		final int sellRes = sell;
+		final int holoRes = holo;
 		metrics.addCustomChart(new Metrics.AdvancedPie("chest_options", () -> {
 			final Map<String, Integer> valueMap = new HashMap<>();
-			valueMap.put("purge", this.getAmount(MetricOption.PURGE));
-			valueMap.put("auto-sell", this.getAmount(MetricOption.AUTO_SELL));
-			valueMap.put("holograms", this.getAmount(MetricOption.HOLOGRAM));
+			valueMap.put("purge", purgeRes);
+			valueMap.put("auto-sell", sellRes);
+			valueMap.put("holograms", holoRes);
 			return valueMap;
 		}));
 	}
+
 }

@@ -52,7 +52,7 @@ public class VoidEconomyManager {
 
 		if (econ == null) {
 			Utils.debug(this.core, "It seems as if VoidEconomy wasn't initialized yet and a sell attempt was made!",
-					"If this message persists being sent, contact the author of the plugin.");
+					"If this message persists being sent, contact Shin1gamiX");
 			return;
 		}
 

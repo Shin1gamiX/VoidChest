@@ -11,17 +11,14 @@ import org.bukkit.inventory.ItemStack;
 
 import com.google.common.base.Preconditions;
 
-import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.data.PlayerData;
+import me.shin1gamix.voidchest.data.PlayerDataManager;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
-import me.shin1gamix.voidchest.utilities.NBTEditor;
+import me.shin1gamix.voidchest.utilities.NBTEditorUtil;
 
 public class VoidManager {
 
-	private final VoidChestPlugin core;
-
-	public VoidManager(final VoidChestPlugin core) {
-		this.core = core;
+	public VoidManager() {
 	}
 
 	public boolean isVoidItem(final ItemStack item) {
@@ -30,7 +27,7 @@ public class VoidManager {
 			return false;
 		}
 
-		final Object obj = NBTEditor.getItemTag(item, "voidKey");
+		final Object obj = NBTEditorUtil.getItemTag(item, "voidKey");
 		if (!(obj instanceof String)) {
 			return false;
 		}
@@ -47,11 +44,10 @@ public class VoidManager {
 	}
 
 	public Optional<VoidStorage> getVoidStorage(final Location location) {
-
 		if (!this.isChest(location)) {
 			return Optional.empty();
 		}
-		for (final PlayerData playerData : this.core.getPlayerDataManager().getPlayerDatas().values()) {
+		for (final PlayerData playerData : PlayerDataManager.getInstance().getPlayerDatas().values()) {
 
 			for (final VoidStorage voidStorage : playerData.getVoidStorages()) {
 
@@ -72,7 +68,7 @@ public class VoidManager {
 	public Optional<VoidStorage> getVoidStorage(final VoidInventoryType type, final Inventory toCompare) {
 		Preconditions.checkNotNull(type, "The VoidInventoryType type can't be null");
 
-		for (final PlayerData playerData : this.core.getPlayerDataManager().getPlayerDatas().values()) {
+		for (final PlayerData playerData : PlayerDataManager.getInstance().getPlayerDatas().values()) {
 
 			for (final VoidStorage voidStorage : playerData.getVoidStorages()) {
 				final Inventory comparedWith;

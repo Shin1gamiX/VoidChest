@@ -24,7 +24,7 @@ import me.shin1gamix.voidchest.ecomanager.VoidEconomy;
 import me.shin1gamix.voidchest.events.VoidSellChestEvent;
 import me.shin1gamix.voidchest.events.VoidSellEvent;
 import me.shin1gamix.voidchest.utilities.MaterialUtil;
-import me.shin1gamix.voidchest.utilities.MessagesX;
+import me.shin1gamix.voidchest.utilities.MessagesUtil;
 import me.shin1gamix.voidchest.utilities.SoundUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
 
@@ -162,7 +162,7 @@ public class CraftVoidEconomy implements VoidEconomy {
 		map.put("%money%", Utils.formatNumber(totalMoneyGained));
 		map.put("%itemssold%", Utils.formatNumber(totalItemsSold));
 		map.put("%itemspurged%", Utils.formatNumber(totalItemsPurged));
-		MessagesX.SELL_INVENTORY.msg(player, map, false);
+		MessagesUtil.SELL_INVENTORY.msg(player, map, false);
 	}
 
 	@Override

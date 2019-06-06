@@ -24,10 +24,11 @@ import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.configuration.CFG;
 import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.data.PlayerData;
+import me.shin1gamix.voidchest.data.PlayerDataManager;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 import me.shin1gamix.voidchest.ecomanager.VoidMode;
 import me.shin1gamix.voidchest.utilities.MaterialUtil;
-import me.shin1gamix.voidchest.utilities.MessagesX;
+import me.shin1gamix.voidchest.utilities.MessagesUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
 import me.shin1gamix.voidchest.utilities.voidmanager.VoidItemManager;
 import me.shin1gamix.voidchest.utilities.voidmanager.VoidItemManager.VoidChestItemCache;
@@ -45,20 +46,31 @@ public final class VoidCommand implements CommandExecutor {
 
 		if (args.length == 0) {
 			this.sendHelp(cs);
-		} else if (args[0].equalsIgnoreCase("reload")) {
+			return true;
+		}
+
+		switch (args[0].toLowerCase()) {
+		case "reload":
 			this.reload(cs);
-		} else if (args[0].equalsIgnoreCase("toggle")) {
+			break;
+		case "toggle":
 			this.toggle(cs);
-		} else if (args[0].equalsIgnoreCase("stats")) {
+			break;
+		case "stats":
 			this.showStats(cs, args.length == 1 ? null : args[1]);
-		} else if (args[0].equalsIgnoreCase("list")) {
+			break;
+		case "list":
 			this.showVoidChests(cs);
-		} else if (args[0].equalsIgnoreCase("boost")) {
+			break;
+		case "boost":
 			this.boost(cs, args);
-		} else if (args[0].equalsIgnoreCase("mode")) {
+			break;
+		case "mode":
 			this.mode(cs);
-		} else {
+			break;
+		default:
 			this.attemptGiveChest(cs, args);
+			break;
 		}
 
 		return true;
@@ -66,7 +78,7 @@ public final class VoidCommand implements CommandExecutor {
 
 	private void mode(CommandSender cs) {
 		if (!cs.hasPermission("voidchest.mode")) {
-			MessagesX.NO_PERMISSION.msg(cs);
+			MessagesUtil.NO_PERMISSION.msg(cs);
 			return;
 		}
 		VoidMode vm = this.core.getVoidEconomyManager().getCurrentMode();
@@ -74,14 +86,14 @@ public final class VoidCommand implements CommandExecutor {
 		final Map<String, String> map = Maps.newHashMap();
 		map.put("%mode%", name);
 		map.put("%mode_name%", this.core.getVoidEconomyManager().getVoidEconomy().getName());
-		MessagesX.VOIDCHEST_MODE.msg(cs, map, false);
+		MessagesUtil.VOIDCHEST_MODE.msg(cs, map, false);
 
 	}
 
 	private void boost(CommandSender cs, String[] args) {
 
 		if (!cs.hasPermission("voidchest.boost")) {
-			MessagesX.NO_PERMISSION.msg(cs);
+			MessagesUtil.NO_PERMISSION.msg(cs);
 			return;
 		}
 
@@ -90,7 +102,7 @@ public final class VoidCommand implements CommandExecutor {
 		 * boost amount.
 		 */
 		if (args.length != 4) {
-			MessagesX.BOOST_USAGE.msg(cs);
+			MessagesUtil.BOOST_USAGE.msg(cs);
 			return;
 		}
 
@@ -102,34 +114,34 @@ public final class VoidCommand implements CommandExecutor {
 		/* Target is offline */
 		if (target == null) {
 			map.put("%player%", args[1]);
-			MessagesX.PLAYER_OFFLINE.msg(cs, map, false);
+			MessagesUtil.PLAYER_OFFLINE.msg(cs, map, false);
 			return;
 		}
 
 		final String boostInput = args[2];
 		if (!Utils.isDouble(boostInput)) {
-			MessagesX.BOOST_USAGE.msg(cs);
+			MessagesUtil.BOOST_USAGE.msg(cs);
 			return;
 		}
 
 		final String boostTimeInput = args[3];
 		if (!Utils.isLong(boostTimeInput)) {
-			MessagesX.BOOST_USAGE.msg(cs);
+			MessagesUtil.BOOST_USAGE.msg(cs);
 			return;
 		}
 
 		final double boost = Double.parseDouble(boostInput);
 		if (boost <= 1d) {
-			MessagesX.BOOST_LIMIT.msg(cs);
+			MessagesUtil.BOOST_LIMIT.msg(cs);
 			return;
 		}
 
-		final PlayerData data = this.core.getPlayerDataManager().loadPlayerData(target);
+		final PlayerData data = PlayerDataManager.getInstance().loadPlayerData(target);
 
 		final long boostTime = Long.parseLong(boostTimeInput);
 
 		if (boostTime < 1) {
-			MessagesX.BOOST_TIME_LIMIT.msg(cs);
+			MessagesUtil.BOOST_TIME_LIMIT.msg(cs);
 			return;
 		}
 
@@ -141,14 +153,14 @@ public final class VoidCommand implements CommandExecutor {
 		map.put("%timeleft%", Utils.convertSeconds(boostTime));
 		map.put("%player%", target.getName());
 		map.put("%boost%", data.getBoosterString());
-		MessagesX.BOOST_APPLIED.msg(cs, map, false);
+		MessagesUtil.BOOST_APPLIED.msg(cs, map, false);
 
 	}
 
 	private void showVoidChests(CommandSender cs) {
 
 		if (!cs.hasPermission("voidchest.list")) {
-			MessagesX.NO_PERMISSION.msg(cs);
+			MessagesUtil.NO_PERMISSION.msg(cs);
 			return;
 		}
 
@@ -159,7 +171,7 @@ public final class VoidCommand implements CommandExecutor {
 		final Map<String, String> map = Maps.newHashMap();
 		map.put("%voidchests%", vcList);
 		map.put("%amount%", String.valueOf(voidChestNames.size()));
-		MessagesX.VOIDCHEST_LIST.msg(cs, map, false);
+		MessagesUtil.VOIDCHEST_LIST.msg(cs, map, false);
 	}
 
 	private void showStats(final CommandSender cs, String targetInput) {
@@ -170,7 +182,7 @@ public final class VoidCommand implements CommandExecutor {
 		if (targetInput == null) {
 
 			if (!cs.hasPermission("voidchest.stats")) {
-				MessagesX.NO_PERMISSION.msg(cs);
+				MessagesUtil.NO_PERMISSION.msg(cs);
 				return;
 			}
 
@@ -178,7 +190,7 @@ public final class VoidCommand implements CommandExecutor {
 				return;
 			}
 			target = (Player) cs;
-			PlayerData data = this.core.getPlayerDataManager().loadPlayerData(target.getUniqueId(), target.getName());
+			PlayerData data = PlayerDataManager.getInstance().loadPlayerData(target.getUniqueId(), target.getName());
 
 			map.put("%voidchests%", String.valueOf(data.getVoidStorages().size()));
 			map.put("%money%",
@@ -190,7 +202,7 @@ public final class VoidCommand implements CommandExecutor {
 			map.put("%booster%", data.getBoosterString());
 			map.put("%timeleft%", data.getBoosterTimeLeft());
 
-			MessagesX.STATS.msg(target, map, false);
+			MessagesUtil.STATS.msg(target, map, false);
 			return;
 		}
 
@@ -200,16 +212,16 @@ public final class VoidCommand implements CommandExecutor {
 		}
 
 		if (!cs.hasPermission("voidchest.stats.other")) {
-			MessagesX.NO_PERMISSION.msg(cs);
+			MessagesUtil.NO_PERMISSION.msg(cs);
 			return;
 		}
 
-		final Optional<PlayerData> opt = this.core.getPlayerDataManager().getPlayerDatas().values().stream()
+		final Optional<PlayerData> opt = PlayerDataManager.getInstance().getPlayerDatas().values().stream()
 				.filter(data -> targetInput.equalsIgnoreCase(data.getOwner().getName())).findAny();
 
 		if (!opt.isPresent()) {
 			map.put("%player%", targetInput);
-			MessagesX.PLAYER_INVALID.msg(cs, map, false);
+			MessagesUtil.PLAYER_INVALID.msg(cs, map, false);
 			return;
 		}
 
@@ -226,15 +238,15 @@ public final class VoidCommand implements CommandExecutor {
 		map.put("%timeleft%", data.getBoosterTimeLeft());
 		map.put("%player%", data.getOwner().getName());
 
-		MessagesX.STATS_OTHER.msg(cs, map, false);
+		MessagesUtil.STATS_OTHER.msg(cs, map, false);
 	}
 
 	private void sendHelp(final CommandSender cs) {
 		if (!cs.hasPermission("voidchest.help")) {
-			MessagesX.NO_PERMISSION.msg(cs);
+			MessagesUtil.NO_PERMISSION.msg(cs);
 			return;
 		}
-		MessagesX.HELP_FORMAT.msg(cs);
+		MessagesUtil.HELP_FORMAT.msg(cs);
 	}
 
 	private void toggle(final CommandSender cs) {
@@ -245,16 +257,16 @@ public final class VoidCommand implements CommandExecutor {
 		final Player player = (Player) cs;
 
 		if (!player.hasPermission("voidchest.toggle")) {
-			MessagesX.NO_PERMISSION.msg(cs);
+			MessagesUtil.NO_PERMISSION.msg(cs);
 			return;
 		}
 
-		final PlayerData data = this.core.getPlayerDataManager().loadPlayerData(player.getUniqueId(), player.getName());
+		final PlayerData data = PlayerDataManager.getInstance().loadPlayerData(player.getUniqueId(), player.getName());
 		final boolean isSend = data.isSendMessage();
 		if (isSend) {
-			MessagesX.SELL_MESSAGE_OFF.msg(player);
+			MessagesUtil.SELL_MESSAGE_OFF.msg(player);
 		} else {
-			MessagesX.SELL_MESSAGE_ON.msg(player);
+			MessagesUtil.SELL_MESSAGE_ON.msg(player);
 		}
 		data.setSendMessage(!isSend);
 	}
@@ -262,7 +274,7 @@ public final class VoidCommand implements CommandExecutor {
 	private void reload(final CommandSender cs) {
 
 		if (!cs.hasPermission("voidchest.reload")) {
-			MessagesX.NO_PERMISSION.msg(cs);
+			MessagesUtil.NO_PERMISSION.msg(cs);
 			return;
 		}
 		if (this.core.isHdSupport()) {
@@ -272,19 +284,19 @@ public final class VoidCommand implements CommandExecutor {
 		CFG.reloadFiles();
 		VoidItemManager.getInstance().cacheItems();
 		final FileManager fm = FileManager.getInstance();
-		MessagesX.repairPaths(fm.getMessages());
+		MessagesUtil.repairPaths(fm.getMessages());
 
 		Bukkit.getServicesManager().unregisterAll(this.core);
 		this.core.getVoidEconomyManager().hookVoidEcon();
 
-		this.core.getPlayerDataManager().savePlayerDatas(true, true, false);
+		PlayerDataManager.getInstance().savePlayerDatas(true, true);
 		fm.getPlayerBase().saveFile();
-		this.core.getPlayerDataManager().loadPlayerDatas();
+		PlayerDataManager.getInstance().loadPlayerDatas();
 
 		this.core.attemptStartSaving();
 		this.core.attemptStartPurging();
 
-		MessagesX.PLUGIN_RELOAD.msg(cs);
+		MessagesUtil.PLUGIN_RELOAD.msg(cs);
 
 		if (this.core.getVoidEconomyManager().getCurrentMode() == VoidMode.CRAFT_VOIDCHEST) {
 			final List<String> debug = Lists.newArrayList();
@@ -303,7 +315,7 @@ public final class VoidCommand implements CommandExecutor {
 	private void attemptGiveChest(CommandSender cs, String[] args) {
 
 		if (!cs.hasPermission("voidchest.give")) {
-			MessagesX.NO_PERMISSION.msg(cs);
+			MessagesUtil.NO_PERMISSION.msg(cs);
 			return;
 		}
 
@@ -312,7 +324,7 @@ public final class VoidCommand implements CommandExecutor {
 
 		if (!cacheOpt.isPresent()) {
 			map.put("%voidchest%", args[0]);
-			MessagesX.VOIDCHEST_GIVE_INVALID.msg(cs, map, false);
+			MessagesUtil.VOIDCHEST_GIVE_INVALID.msg(cs, map, false);
 			this.showVoidChests(cs);
 			return;
 		}
@@ -329,7 +341,7 @@ public final class VoidCommand implements CommandExecutor {
 		Player target = Bukkit.getPlayer(args[1]);
 		if (target == null) {
 			map.put("%player%", args[1]);
-			MessagesX.PLAYER_OFFLINE.msg(cs, map, false);
+			MessagesUtil.PLAYER_OFFLINE.msg(cs, map, false);
 			return;
 		}
 
@@ -358,8 +370,8 @@ public final class VoidCommand implements CommandExecutor {
 		replace.put("%player%", target.getName());
 		replace.put("%amount%", NumberFormat.getInstance(Locale.US).format(amount));
 		replace.put("%voidchest%", ic.getName());
-		MessagesX.VOIDCHEST_GIVE.msg(cs, replace, false);
-		MessagesX.VOIDCHEST_RECEIVE.msg(target, replace, false);
+		MessagesUtil.VOIDCHEST_GIVE.msg(cs, replace, false);
+		MessagesUtil.VOIDCHEST_RECEIVE.msg(target, replace, false);
 	}
 
 }

@@ -14,7 +14,7 @@ import com.google.common.collect.Maps;
 
 import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.utilities.MaterialUtil;
-import me.shin1gamix.voidchest.utilities.NBTEditor;
+import me.shin1gamix.voidchest.utilities.NBTEditorUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
 
 public final class VoidItemManager {
@@ -115,7 +115,7 @@ public final class VoidItemManager {
 			if (this.item == null) {
 				final FileManager fm = FileManager.getInstance();
 				final FileConfiguration voidInventory = fm.getVoidInventory().getFile();
-				this.item = NBTEditor.setItemTag(MaterialUtil.CHEST.parseItem(), this.name, "voidKey");
+				this.item = NBTEditorUtil.setItemTag(MaterialUtil.CHEST.parseItem(), this.name, "voidKey");
 				final ItemMeta meta = item.getItemMeta();
 				Map<String, String> map = Maps.newHashMap();
 				map.put("%voidchest%", this.name);

@@ -106,7 +106,7 @@ public class PlayerData {
 		this.sendMessage = sendMessage;
 	}
 
-	public void terminate(final boolean saveFile) {
+	public void terminate() {
 		FileConfiguration file = FileManager.getInstance().getPlayerBase().getFile();
 		String name = getOwner().getName();
 		file.set("Players." + name, null);
@@ -128,9 +128,6 @@ public class PlayerData {
 			file.set("Players." + name + ".chests." + i + ".creation-time", chest.getCreationTime());
 			this.saveChestsInFile(file, chest, i);
 			++i;
-		}
-		if (saveFile) {
-			FileManager.getInstance().getPlayerBase().saveFile();
 		}
 	}
 

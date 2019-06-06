@@ -14,11 +14,12 @@ import org.bukkit.inventory.ItemStack;
 import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.data.PlayerData;
+import me.shin1gamix.voidchest.data.PlayerDataManager;
 import me.shin1gamix.voidchest.data.customchest.VoidChestOption;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 import me.shin1gamix.voidchest.events.VoidChestPlaceEvent;
-import me.shin1gamix.voidchest.utilities.MessagesX;
-import me.shin1gamix.voidchest.utilities.NBTEditor;
+import me.shin1gamix.voidchest.utilities.MessagesUtil;
+import me.shin1gamix.voidchest.utilities.NBTEditorUtil;
 import me.shin1gamix.voidchest.utilities.SoundUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
 
@@ -40,23 +41,23 @@ public class VoidChestPlaceListener implements Listener {
 		}
 
 		final Player player = e.getPlayer();
-		final PlayerData data = this.core.getPlayerDataManager().loadPlayerData(player);
+		final PlayerData data = PlayerDataManager.getInstance().loadPlayerData(player);
 
 		/* This is indeed a voidchest. */
-		final String voidChestName = NBTEditor.getItemTag(item, "voidKey").toString();
+		final String voidChestName = NBTEditorUtil.getItemTag(item, "voidKey").toString();
 		final VoidStorage voidStorage = new VoidStorage(data, voidChestName, e.getBlock());
 
 		/* Does the player have permission to place this voidchest? */
 		if (!player.hasPermission(voidStorage.getPermissionPlace())) {
 			e.setCancelled(true);
-			MessagesX.NO_PERMISSION.msg(player);
+			MessagesUtil.NO_PERMISSION.msg(player);
 			return;
 		}
 
 		/* Does the player have permission to place any further voidchests? */
 		final int limit = FileManager.getInstance().getOptions().getFile().getInt("Player.voidchest.limit", 5);
-		if (data.getVoidStorages().size() >= limit && !player.hasPermission("voidchest.bypass")) {
-			MessagesX.VOIDCHEST_LIMIT_REACHED.msg(player);
+		if (data.getVoidStorages().size() >= limit && !player.hasPermission("voidchest.limit.bypass")) {
+			MessagesUtil.VOIDCHEST_LIMIT_REACHED.msg(player);
 			e.setCancelled(true);
 			return;
 		}

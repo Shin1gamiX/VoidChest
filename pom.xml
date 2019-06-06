@@ -6,7 +6,7 @@
 	<artifactId>voidchest</artifactId>
 	<version>1.0.2</version>
 	<packaging>jar</packaging>
-	<description>VoidChest, a special auto sell chest plugin. Create unique chests and get rich the smart way!</description>
+	<description>A special auto sell chest plugin. Create unique chests and get rich the smart way!</description>
 	<name>VoidChest</name>
 
 	<properties>
@@ -16,7 +16,7 @@
 	</properties>
 
 	<build>
-
+		<finalName>VoidChest</finalName>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -25,6 +25,35 @@
 		</resources>
 
 		<plugins>
+
+
+
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.0.2</version>
+				<executions>
+					<execution>
+						<id>copy-to-testserver</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>C:\Users\Anesths\Desktop\server\plugins\</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}</directory>
+									<includes>
+										<include>${project.name}.jar</include>
+									</includes>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -77,7 +106,7 @@
 			<groupId>ShopGuiPlugin</groupId>
 			<version>1.19.4</version>
 			<scope>system</scope>
-			<systemPath>C:\Users\Anesths\Desktop\server\plugins\shopguiplus.jar</systemPath>
+			<systemPath>${basedir}\lib\shopguiplus.jar</systemPath>
 		</dependency>
 
 		<dependency>

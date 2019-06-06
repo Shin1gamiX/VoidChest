@@ -8,8 +8,8 @@ import org.bukkit.event.HandlerList;
 import me.shin1gamix.voidchest.data.customchest.items.VoidIcon;
 
 public class VoidItemMenuClickEvent extends Event implements Cancellable {
-	private boolean cancel;
 
+	private boolean cancel;
 	private final VoidIcon voidItem;
 	private final Player player;
 

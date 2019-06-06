@@ -37,7 +37,7 @@ public class VoidEconomyRegisterListener implements Listener {
 			debugging.add("A plugin has attemted to register their api in the server, details are shown below.");
 			try {
 				debugging.add("Details: " + ((VoidEconomy) event.getProvider().getProvider()).getName());
-			} catch (Exception e) {
+			} catch (ClassCastException e) {
 				debugging.add("Something went wrong, contact Shin1gamiX");
 				debugging.add(e.getMessage());
 			}
@@ -70,7 +70,7 @@ public class VoidEconomyRegisterListener implements Listener {
 		final VoidEconomy econ = provider.getProvider();
 		if (debug) {
 			debugging.add("registered an api: " + econ.getName());
-			Utils.debug(this.core,debugging);
+			Utils.debug(this.core, debugging);
 		}
 		this.core.getVoidEconomyManager().setVoidEconomy(econ);
 	}

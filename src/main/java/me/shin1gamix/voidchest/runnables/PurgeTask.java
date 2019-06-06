@@ -12,6 +12,7 @@ import com.google.common.collect.Sets;
 
 import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.data.PlayerData;
+import me.shin1gamix.voidchest.data.PlayerDataManager;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 import me.shin1gamix.voidchest.utilities.DebugUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
@@ -29,7 +30,7 @@ public class PurgeTask extends BukkitRunnable {
 
 		final List<TempCache> temp = Lists.newArrayList();
 
-		for (final PlayerData data : core.getPlayerDataManager().getPlayerDatas().values()) {
+		for (final PlayerData data : PlayerDataManager.getInstance().getPlayerDatas().values()) {
 
 			/* Creating a temporary cache for storing data so as to remove things later. */
 			final TempCache tempCache = new TempCache(data);

@@ -7,6 +7,14 @@ import org.bukkit.event.HandlerList;
 
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 
+/**
+ * 
+ * This event is fired before a voidchest's hologram is replaced. Modifying the
+ * lines through this event may cause unexpected behavior.
+ * 
+ * @see VoidStorage#updateHologram()
+ * 
+ */
 public class VoidChestHologramUpdateEvent extends Event {
 
 	private final VoidStorage voidStorage;

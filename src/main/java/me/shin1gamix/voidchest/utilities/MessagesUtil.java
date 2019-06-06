@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 
 import me.shin1gamix.voidchest.configuration.CFG;
 
-public enum MessagesX {
+public enum MessagesUtil {
 
 	NO_PERMISSION("Messages.No-Permission", "&c&l(!) &cYou do not have the correct permissions to do this!"),
 
@@ -135,7 +135,7 @@ public enum MessagesX {
 	private String[] messages;
 	private final String path;
 
-	MessagesX(final String path, final String... messages) {
+	MessagesUtil(final String path, final String... messages) {
 		this.messages = messages;
 		this.path = path;
 	}
@@ -150,14 +150,14 @@ public enum MessagesX {
 
 	/**
 	 * @param cfg
-	 * @see #setPathToFile(CFG, MessagesX)
-	 * @see #setMessageToFile(CFG, MessagesX)
+	 * @see #setPathToFile(CFG, MessagesUtil)
+	 * @see #setMessageToFile(CFG, MessagesUtil)
 	 */
 	public static void repairPaths(final CFG cfg) {
 
 		boolean changed = false;
 
-		for (MessagesX enumMessage : MessagesX.values()) {
+		for (MessagesUtil enumMessage : MessagesUtil.values()) {
 
 			/* Does our file contain our path? */
 			if (cfg.getFile().contains(enumMessage.getPath())) {
@@ -185,7 +185,7 @@ public enum MessagesX {
 	 * @param cfg
 	 * @param enumMessage
 	 */
-	private static void setMessageToPath(final CFG cfg, final MessagesX enumMessage) {
+	private static void setMessageToPath(final CFG cfg, final MessagesUtil enumMessage) {
 		/* Is our message multilined? */
 		if (enumMessage.isMultiLined()) {
 			/* Set our message (array) to the path. */
@@ -203,7 +203,7 @@ public enum MessagesX {
 	 * @param cfg
 	 * @param enumMessage
 	 */
-	private static void setPathToMessage(final CFG cfg, final MessagesX enumMessage) {
+	private static void setPathToMessage(final CFG cfg, final MessagesUtil enumMessage) {
 		/* Is our path a list? */
 		if (Utils.isList(cfg.getFile(), enumMessage.getPath())) {
 			/* Set our default message to be the path's message. */

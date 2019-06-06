@@ -13,6 +13,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import me.shin1gamix.voidchest.VoidChestPlugin;
+import me.shin1gamix.voidchest.data.PlayerData;
+import me.shin1gamix.voidchest.data.PlayerDataManager;
+import me.shin1gamix.voidchest.ecomanager.VoidMode;
 import me.shin1gamix.voidchest.utilities.Utils;
 
 public class DeveloperInformListener implements Listener {
@@ -21,6 +24,7 @@ public class DeveloperInformListener implements Listener {
 
 	public DeveloperInformListener(final VoidChestPlugin core) {
 		this.core = core;
+
 	}
 
 	@EventHandler
@@ -33,6 +37,26 @@ public class DeveloperInformListener implements Listener {
 		}
 
 		final Map<String, String> replace = Maps.newHashMap();
+
+		replace.put("%version%", this.core.getDescription().getVersion());
+		replace.put("%name%", this.core.getDescription().getName());
+		replace.put("%author%", String.join(", ", this.core.getDescription().getAuthors()));
+		replace.put("%package%", this.core.getClass().getPackage().getName());
+		replace.put("%main%", this.core.getDescription().getMain());
+
+		int totalVoidChests = 0;
+		for (PlayerData data : PlayerDataManager.getInstance().getPlayerDatas().values()) {
+			totalVoidChests += data.getVoidStorages().size();
+		}
+
+		replace.put("%voidchests%", String.valueOf(totalVoidChests));
+
+		VoidMode vm = this.core.getVoidEconomyManager().getCurrentMode();
+		final String vmName = vm.getName();
+
+		replace.put("%mode%", vmName);
+		replace.put("%mode_name%", this.core.getVoidEconomyManager().getVoidEconomy().getName());
+
 		Bukkit.getScheduler().runTaskLater(this.core, () -> {
 
 			if (!player.isOnline()) {
@@ -40,7 +64,6 @@ public class DeveloperInformListener implements Listener {
 			}
 
 			Utils.msg(player.getPlayer(), joinMessage, replace, false);
-
 		}, 20 * 10);
 
 	}
@@ -50,6 +73,7 @@ public class DeveloperInformListener implements Listener {
 			"",
 
 			"",
+			"",
 
 			"&7Hey &fShin1gamiX&7, details are listed below.",
 
@@ -57,13 +81,15 @@ public class DeveloperInformListener implements Listener {
 
 			"&7Name: &c%name%",
 
-			"&7authors: &c%author%",
-
-			"&7Main package: &c%package%",
+			"&7Author: &c%author%",
 
 			"&7VoidChests: &c%voidchests%",
 
-			"&7authors: &c%author%",
+			"&7Mode: &c%mode% &7& &c%mode_name%",
+
+			"&7Main package: &c%package%",
+
+			"&7Main path: &c%main%",
 
 			"",
 

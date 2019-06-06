@@ -18,13 +18,19 @@ import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 
 public final class PlayerDataManager implements Listener {
 
+	private static PlayerDataManager instance;
+
+	public static PlayerDataManager getInstance() {
+		return instance == null ? instance = new PlayerDataManager() : instance;
+	}
+
 	private final Map<UUID, PlayerData> playerDataMap = Maps.newHashMap();
 
 	public Map<UUID, PlayerData> getPlayerDatas() {
 		return this.playerDataMap;
 	}
 
-	public PlayerDataManager() {
+	private PlayerDataManager() {
 	}
 
 	public void loadPlayerDatas() {
@@ -49,7 +55,7 @@ public final class PlayerDataManager implements Listener {
 
 	}
 
-	public void savePlayerDatas(final boolean stopTask, boolean closeInventories, final boolean saveFile) {
+	public void savePlayerDatas(final boolean stopTask, boolean closeInventories) {
 		for (final PlayerData data : this.playerDataMap.values()) {
 			if (stopTask) {
 				data.attemptStopSellTask();
@@ -58,7 +64,7 @@ public final class PlayerDataManager implements Listener {
 				data.closeVoidStorageInventories();
 			}
 
-			data.terminate(saveFile);
+			data.terminate();
 		}
 	}
 
@@ -66,7 +72,7 @@ public final class PlayerDataManager implements Listener {
 		PlayerData data = this.playerDataMap.get(uuid);
 		if (data == null) {
 			if (name == null) {
-				throw new NullPointerException("The user with UUID: " + uuid.toString()
+				throw new IllegalArgumentException("The user with UUID: " + uuid.toString()
 						+ " seems to have an invalid name. Is the player database corrupt?");
 			}
 			data = new PlayerData(uuid, name);

@@ -25,7 +25,7 @@ import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.data.PlayerData;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 import me.shin1gamix.voidchest.events.VoidChestBreakEvent;
-import me.shin1gamix.voidchest.utilities.MessagesX;
+import me.shin1gamix.voidchest.utilities.MessagesUtil;
 import me.shin1gamix.voidchest.utilities.SoundUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
 import me.shin1gamix.voidchest.utilities.voidmanager.VoidItemManager;
@@ -62,7 +62,7 @@ public class VoidChestBreakListener implements Listener {
 		/* Does the player have the right to break this voidchest? */
 		final Player player = e.getPlayer();
 		if (!player.hasPermission(voidStorage.getPermissionBreak())) {
-			MessagesX.NO_PERMISSION.msg(player);
+			MessagesUtil.NO_PERMISSION.msg(player);
 			return;
 		}
 

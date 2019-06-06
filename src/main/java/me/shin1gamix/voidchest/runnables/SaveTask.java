@@ -2,22 +2,20 @@ package me.shin1gamix.voidchest.runnables;
 
 import org.bukkit.scheduler.BukkitRunnable;
 
-import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.data.PlayerData;
+import me.shin1gamix.voidchest.data.PlayerDataManager;
 
 public class SaveTask extends BukkitRunnable {
 
-	private final VoidChestPlugin core;
-
-	public SaveTask(final VoidChestPlugin core) {
-		this.core = core;
+	public SaveTask() {
 	}
 
 	@Override
 	public void run() {
-		for (final PlayerData data : this.core.getPlayerDataManager().getPlayerDatas().values()) {
-			data.terminate(false);
+		final PlayerDataManager pdm = PlayerDataManager.getInstance();
+		for (final PlayerData data : pdm.getPlayerDatas().values()) {
+			data.terminate();
 		}
 		FileManager.getInstance().getPlayerBase().saveFile();
 	}

@@ -1,21 +1,19 @@
 package me.shin1gamix.voidchest.events;
 
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 
-public class VoidSellEvent extends Event implements Cancellable {
+public class VoidSellEvent extends VoidEvent {
 	private final ItemStack item;
-	private final VoidStorage voidStorage;
+
 	private double price;
 	private boolean cancel;
 
 	public VoidSellEvent(final VoidStorage voidStorage, final ItemStack item, final double price) {
+		super(voidStorage);
 		this.item = item;
-		this.voidStorage = voidStorage;
 		this.price = price;
 	}
 
@@ -42,10 +40,6 @@ public class VoidSellEvent extends Event implements Cancellable {
 
 	public ItemStack getItem() {
 		return item;
-	}
-
-	public VoidStorage getVoidStorage() {
-		return voidStorage;
 	}
 
 	public double getPrice() {

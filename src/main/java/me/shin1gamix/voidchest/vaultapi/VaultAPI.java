@@ -1,4 +1,4 @@
-package me.shin1gamix.voidchest.utilities;
+package me.shin1gamix.voidchest.vaultapi;
 
 import me.shin1gamix.voidchest.VoidChestPlugin;
 import net.milkbowl.vault.economy.Economy;

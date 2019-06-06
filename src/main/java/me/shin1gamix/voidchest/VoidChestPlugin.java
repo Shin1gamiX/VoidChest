@@ -1,5 +1,7 @@
 package me.shin1gamix.voidchest;
 
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
@@ -10,11 +12,13 @@ import org.bukkit.scheduler.BukkitTask;
 
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import com.google.common.collect.Maps;
 
 import me.shin1gamix.voidchest.commands.VoidCommand;
 import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.data.PlayerDataManager;
 import me.shin1gamix.voidchest.ecomanager.VoidEconomyManager;
+import me.shin1gamix.voidchest.listener.DeveloperInformListener;
 import me.shin1gamix.voidchest.listener.InventoryInteractListener;
 import me.shin1gamix.voidchest.listener.VoidChestBreakListener;
 import me.shin1gamix.voidchest.listener.VoidChestExplodeListener;
@@ -26,12 +30,13 @@ import me.shin1gamix.voidchest.runnables.HologramTimerTask;
 import me.shin1gamix.voidchest.runnables.PurgeTask;
 import me.shin1gamix.voidchest.runnables.SaveTask;
 import me.shin1gamix.voidchest.runnables.UpdateCheckTask;
-import me.shin1gamix.voidchest.utilities.MessagesX;
-import me.shin1gamix.voidchest.utilities.VaultAPI;
+import me.shin1gamix.voidchest.utilities.MessagesUtil;
+import me.shin1gamix.voidchest.utilities.Utils;
 import me.shin1gamix.voidchest.utilities.voidmanager.VoidItemManager;
 import me.shin1gamix.voidchest.utilities.voidmanager.VoidManager;
+import me.shin1gamix.voidchest.vaultapi.VaultAPI;
 
-public class VoidChestPlugin extends JavaPlugin implements Listener {
+public class VoidChestPlugin extends JavaPlugin {
 
 	private static VoidChestPlugin plugin;
 
@@ -40,8 +45,7 @@ public class VoidChestPlugin extends JavaPlugin implements Listener {
 	}
 
 	private final VaultAPI vault = new VaultAPI(this);
-	private PlayerDataManager playerDataManager;
-	private VoidManager voidManager;
+	private VoidManager voidManager = new VoidManager();
 	private final VoidEconomyManager voidEconomyManager = new VoidEconomyManager(this);
 
 	private boolean hdSupport = false;
@@ -52,16 +56,21 @@ public class VoidChestPlugin extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 
+		long startTime = System.currentTimeMillis();
+		Map<String, String> map = Maps.newHashMap();
+		map.put("%version%", this.getDescription().getVersion());
+		System.out.println(Utils.placeHolder("[VoidChest-%version%] Loading plugin and related data...", map, false));
+
 		FileManager fmanager = FileManager.getInstance();
 		fmanager.loadFiles(this);
-		MessagesX.repairPaths(fmanager.getMessages());
+		MessagesUtil.repairPaths(fmanager.getMessages());
 
-		this.voidManager = new VoidManager(this);
-		this.playerDataManager = new PlayerDataManager();
+		final PlayerDataManager pdm = PlayerDataManager.getInstance();
 
-		final Listener[] listeners = new Listener[] { this.playerDataManager, new VoidChestBreakListener(this),
+		final Listener[] listeners = new Listener[] { pdm, new VoidChestBreakListener(this),
 				new VoidChestPlaceListener(this), new InventoryInteractListener(this), new VoidMenuClickListener(this),
-				new VoidEconomyRegisterListener(this), new VoidChestExplodeListener(this) };
+				new VoidEconomyRegisterListener(this), new VoidChestExplodeListener(this),
+				new DeveloperInformListener(this) };
 
 		final PluginManager pm = Bukkit.getPluginManager();
 		for (Listener listener : listeners) {
@@ -86,11 +95,20 @@ public class VoidChestPlugin extends JavaPlugin implements Listener {
 		new UpdateCheckTask(this).runTaskTimer(this, 20 * 10, (20 * 60) * 60 * 2);
 
 		Bukkit.getScheduler().runTaskLater(this, () -> {
-			this.playerDataManager.loadPlayerDatas();
+			pdm.loadPlayerDatas();
 			this.voidEconomyManager.hookVoidEcon();
 		}, 1);
 
-		
+		final String result = String.valueOf(System.currentTimeMillis() - startTime) + "ms";
+		map.put("%result%", result);
+		Bukkit.getScheduler().runTaskLater(this, () -> {
+			System.out.println(" ");
+			System.out.println(" ");
+			System.out.println(Utils.placeHolder("[VoidChest-%version%] Plugin loaded in %result%", map, false));
+			System.out.println(" ");
+			System.out.println(" ");
+		}, 20 * 5);
+
 	}
 
 	public void attemptStartSaving() {
@@ -104,8 +122,8 @@ public class VoidChestPlugin extends JavaPlugin implements Listener {
 		}
 
 		final long interval = options.getLong("Saving.interval", 30);
-		final SaveTask task = new SaveTask(this);
-		this.savingTask = task.runTaskTimer(this, 100, interval * 20);
+
+		this.savingTask = new SaveTask().runTaskTimer(this, 100, interval * 20);
 	}
 
 	public void attemptStartPurging() {
@@ -138,19 +156,12 @@ public class VoidChestPlugin extends JavaPlugin implements Listener {
 			this.purgingTask = null;
 		}
 
-		this.playerDataManager.savePlayerDatas(true, true, false);
+		PlayerDataManager.getInstance().savePlayerDatas(true, true);
 		FileManager.getInstance().getPlayerBase().saveFile();
 		Bukkit.getServicesManager().unregisterAll(this);
 		if (this.hdSupport) {
 			HologramsAPI.getHolograms(this).forEach(Hologram::delete);
 		}
-	}
-
-	/**
-	 * @return the pdm
-	 */
-	public PlayerDataManager getPlayerDataManager() {
-		return this.playerDataManager;
 	}
 
 	/**

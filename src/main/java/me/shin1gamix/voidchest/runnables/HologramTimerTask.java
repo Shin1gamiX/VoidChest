@@ -4,6 +4,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.data.PlayerData;
+import me.shin1gamix.voidchest.data.PlayerDataManager;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 
 public class HologramTimerTask extends BukkitRunnable {
@@ -21,7 +22,7 @@ public class HologramTimerTask extends BukkitRunnable {
 			return;
 		}
 
-		for (PlayerData data : this.core.getPlayerDataManager().getPlayerDatas().values()) {
+		for (PlayerData data : PlayerDataManager.getInstance().getPlayerDatas().values()) {
 			data.getVoidStorages().forEach(VoidStorage::updateHologram);
 		}
 

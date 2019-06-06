@@ -49,7 +49,7 @@ public final class VoidChestAPI {
 	}
 
 	public PlayerDataManager getPlayerDataManager() {
-		return VoidChestPlugin.getInstance().getPlayerDataManager();
+		return PlayerDataManager.getInstance();
 	}
 
 	public VoidItemManager getVoidItemManager() {

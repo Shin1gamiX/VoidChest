@@ -1,6 +1,7 @@
 package me.shin1gamix.voidchest.events;
 
-import org.bukkit.entity.Entity;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
@@ -14,13 +15,13 @@ import me.shin1gamix.voidchest.listener.VoidChestBreakListener;
  * @see VoidChestBreakListener
  * 
  */
-public class VoidChestBreakEvent extends VoidEvent {
+public abstract class VoidEvent extends Event implements Cancellable {
 
-	private final Entity entity;
+	private final VoidStorage voidStorage;
+	private boolean cancel;
 
-	public VoidChestBreakEvent(final Entity entity, final VoidStorage voidStorage) {
-		super(voidStorage);
-		this.entity = entity;
+	public VoidEvent(final VoidStorage voidStorage) {
+		this.voidStorage = voidStorage;
 	}
 
 	private static final HandlerList HANDLERS = new HandlerList();
@@ -34,8 +35,18 @@ public class VoidChestBreakEvent extends VoidEvent {
 		return HANDLERS;
 	}
 
-	public Entity getEntity() {
-		return entity;
+	@Override
+	public boolean isCancelled() {
+		return this.cancel;
+	}
+
+	@Override
+	public void setCancelled(boolean cancel) {
+		this.cancel = cancel;
+	}
+
+	public VoidStorage getVoidStorage() {
+		return this.voidStorage;
 	}
 
 }
