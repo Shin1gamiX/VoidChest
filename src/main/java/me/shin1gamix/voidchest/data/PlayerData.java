@@ -118,7 +118,9 @@ public class PlayerData {
 	 */
 	public void loadToFile() {
 		FileConfiguration file = FileManager.getInstance().getPlayerBase().getFile();
-		String name = getOwner().getName();
+		String name = this.name;
+
+		/* Delete the path entirely. */
 		file.set("Players." + name, null);
 
 		file.set("Players." + name + ".uuid", getOwner().getUniqueId().toString());
@@ -162,14 +164,15 @@ public class PlayerData {
 	public void init(final boolean saveFile, final boolean deletePath) {
 		final FileConfiguration file = FileManager.getInstance().getPlayerBase().getFile();
 
-		if (!file.isSet("Players." + this.name)) {
+		ConfigurationSection playerSect = file.getConfigurationSection("Players." + this.name);
+		if (playerSect == null) {
 			return;
 		}
 
-		this.setBooster(file.getDouble("Players." + this.name + ".booster.multiplier", 1d));
-		this.setBoostTime(file.getLong("Players." + this.name + ".booster.time", 0l));
+		this.setBooster(playerSect.getDouble("booster.multiplier", 1d));
+		this.setBoostTime(playerSect.getLong("booster.time", 0l));
 
-		final ConfigurationSection sect = file.getConfigurationSection("Players." + this.name + ".chests");
+		final ConfigurationSection sect = playerSect.getConfigurationSection("chests");
 		if (sect == null) {
 			return;
 		}

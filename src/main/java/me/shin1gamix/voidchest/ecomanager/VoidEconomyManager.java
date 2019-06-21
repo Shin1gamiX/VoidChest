@@ -44,9 +44,8 @@ public class VoidEconomyManager {
 	public void initiateSell(final PlayerData data) {
 
 		if (this.voidEconomy == null) {
-			new VoidEconomyNotInitialized("It seems as if VoidEconomy wasn't initialized yet and a sell attempt was made!",
-					"If this message persists being sent, contact Shin1gamiX").printStackTrace();
-			return;
+			throw new VoidEconomyNotInitialized("It seems as if VoidEconomy wasn't initialized yet and a sell attempt was made!",
+					"If this message persists being sent, contact Shin1gamiX");
 		}
 
 		data.setAttemptSaleTime(System.currentTimeMillis()

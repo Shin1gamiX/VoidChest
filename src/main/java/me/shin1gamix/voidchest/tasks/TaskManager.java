@@ -13,7 +13,7 @@ public class TaskManager {
 		this.core = core;
 	}
 
-	private BukkitTask savingTask = null;
+	private SaveTask savingTask = null;
 	private BukkitTask purgingTask = null;
 	private BukkitTask hologramUpdateTask = null;
 
@@ -29,7 +29,8 @@ public class TaskManager {
 
 		final long interval = options.getLong("Saving.interval", 30);
 
-		this.savingTask = new SaveTask(core).runTaskTimer(this.core, 100, interval * 20);
+		this.savingTask = new SaveTask(core);
+		this.savingTask.runTaskTimer(this.core, 100, interval * 20);
 	}
 
 	public void attemptStartHologram() {
@@ -63,11 +64,11 @@ public class TaskManager {
 
 	}
 
-	public BukkitTask getSavingTask() {
+	public SaveTask getSavingTask() {
 		return savingTask;
 	}
 
-	public void setSavingTask(BukkitTask savingTask) {
+	public void setSavingTask(SaveTask savingTask) {
 		this.savingTask = savingTask;
 	}
 
@@ -99,6 +100,7 @@ public class TaskManager {
 		}
 
 		if (this.savingTask != null) {
+			this.savingTask.getPartitionTasks().values().forEach(task -> task.cancel());
 			this.savingTask.cancel();
 			this.savingTask = null;
 		}

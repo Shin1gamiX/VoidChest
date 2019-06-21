@@ -188,6 +188,7 @@ public final class VoidCommand implements CommandExecutor {
 		PlayerDataManager.getInstance().loadPlayerDatas();
 
 		TaskManager tm = this.core.getTaskManager();
+		tm.disableAll();
 		tm.attemptStartSaving();
 		tm.attemptStartPurging();
 		tm.attemptStartHologram();

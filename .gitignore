@@ -1,0 +1,13 @@
+/target/
+.settings/fr.kazejiyu.discord.rpc.integration.prefs
+.classpath
+.project
+.settings/org.eclipse.core.resources.prefs
+.settings/org.eclipse.jdt.core.prefs
+.settings/org.eclipse.m2e.core.prefs
+lib/shopguiplus.jar
+pom.xml
+dependency-reduced-pom.xml
+pom.xml
+pom.xml
+*.xml

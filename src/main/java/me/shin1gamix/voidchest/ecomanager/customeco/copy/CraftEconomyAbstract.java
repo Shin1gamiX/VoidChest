@@ -20,7 +20,7 @@ import me.shin1gamix.voidchest.data.PlayerData;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 import me.shin1gamix.voidchest.ecomanager.VoidEconomy;
 import me.shin1gamix.voidchest.events.VoidSellChestEvent;
-import me.shin1gamix.voidchest.events.VoidSellEvent;
+import me.shin1gamix.voidchest.events.VoidSellItemEvent;
 import me.shin1gamix.voidchest.utilities.MessagesUtil;
 import me.shin1gamix.voidchest.utilities.SoundUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
@@ -74,7 +74,7 @@ public abstract class CraftEconomyAbstract implements VoidEconomy {
 				}
 
 				final double eventProfit = this.getProfit(item) * voidStorage.getBooster() * data.getBooster();
-				VoidSellEvent sellEvent = new VoidSellEvent(voidStorage, item, eventProfit);
+				VoidSellItemEvent sellEvent = new VoidSellItemEvent(voidStorage, item, eventProfit);
 				Bukkit.getPluginManager().callEvent(sellEvent);
 				if (sellEvent.isCancelled()) {
 					continue;

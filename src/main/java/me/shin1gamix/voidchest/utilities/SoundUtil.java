@@ -209,7 +209,9 @@ public enum SoundUtil {
 
 	MAGMACUBE_JUMP("MAGMACUBE_JUMP", "ENTITY_MAGMACUBE_JUMP", "ENTITY_MAGMA_CUBE_JUMP"),
 
-	PIG_IDLE("PIG_IDLE", "ENTITY_PIG_AMBIENT"), PIG_DEATH("PIG_DEATH", "ENTITY_PIG_DEATH"),
+	PIG_IDLE("PIG_IDLE", "ENTITY_PIG_AMBIENT"),
+
+	PIG_DEATH("PIG_DEATH", "ENTITY_PIG_DEATH"),
 
 	PIG_WALK("PIG_WALK", "ENTITY_PIG_STEP"),
 
@@ -346,13 +348,17 @@ public enum SoundUtil {
 
 	HORSE_HIT("HORSE_HIT", "ENTITY_HORSE_HURT"),
 
-	HORSE_IDLE("HORSE_IDLE", "ENTITY_HORSE_AMBIENT"), HORSE_JUMP("HORSE_JUMP", "ENTITY_HORSE_JUMP"),
+	HORSE_IDLE("HORSE_IDLE", "ENTITY_HORSE_AMBIENT"),
+
+	HORSE_JUMP("HORSE_JUMP", "ENTITY_HORSE_JUMP"),
 
 	HORSE_LAND("HORSE_LAND", "ENTITY_HORSE_LAND"),
 
 	HORSE_SADDLE("HORSE_SADDLE", "ENTITY_HORSE_SADDLE"),
 
-	HORSE_SOFT("HORSE_SOFT", "ENTITY_HORSE_STEP"), HORSE_WOOD("HORSE_WOOD", "ENTITY_HORSE_STEP_WOOD"),
+	HORSE_SOFT("HORSE_SOFT", "ENTITY_HORSE_STEP"),
+
+	HORSE_WOOD("HORSE_WOOD", "ENTITY_HORSE_STEP_WOOD"),
 
 	DONKEY_ANGRY("DONKEY_ANGRY", "ENTITY_DONKEY_ANGRY"),
 
@@ -401,14 +407,18 @@ public enum SoundUtil {
 	 * @return corresponding {@link org.bukkit.Sound}
 	 */
 	public org.bukkit.Sound bukkitSound() {
-		if (cached != null)
+
+		if (cached != null) {
 			return cached;
+		}
+
 		for (String name : versionDependentNames) {
 			try {
 				return cached = org.bukkit.Sound.valueOf(name);
 			} catch (IllegalArgumentException ignore2) {
 			}
 		}
+
 		throw new IllegalArgumentException("Found no valid sound name for " + this.name());
 	}
 

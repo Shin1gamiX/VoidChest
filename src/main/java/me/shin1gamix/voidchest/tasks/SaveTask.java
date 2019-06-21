@@ -1,16 +1,20 @@
 package me.shin1gamix.voidchest.tasks;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.configuration.FileManager;
@@ -19,20 +23,35 @@ import me.shin1gamix.voidchest.data.PlayerDataManager;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 
 public class SaveTask extends BukkitRunnable {
+	public Map<String, BukkitTask> getPartitionTasks() {
+		return partitionTasks;
+	}
+
 	private final VoidChestPlugin core;
 
 	public SaveTask(final VoidChestPlugin core) {
 		this.core = core;
 	}
 
+	private Map<String, BukkitTask> partitionTasks = Maps.newHashMap();
+
+	private final Set<PlayerData> saving = Sets.newHashSet();
+
 	@Override
 	public void run() {
+
 		final PlayerDataManager pdm = PlayerDataManager.getInstance();
 		FileConfiguration file = FileManager.getInstance().getPlayerBase().getFile();
 
 		List<PlayerData> copyData = Lists.newArrayList(pdm.getPlayerDatas().values());
 
+		final int maxSize = copyData.size();
+
 		for (final PlayerData data : copyData) {
+
+			if (!saving.add(data)) {
+				continue;
+			}
 
 			String name = data.getName();
 
@@ -40,37 +59,49 @@ public class SaveTask extends BukkitRunnable {
 
 			ConfigurationSection sect = file.createSection("Players." + name);
 
-			sect.set("Players." + name + ".uuid", data.getOwner().getUniqueId().toString());
+			sect.set("uuid", data.getOwner().getUniqueId().toString());
 			sect.set("booster.multiplier", data.getBooster());
 			sect.set("booster.time", data.getBoostTime());
 
 			/* Copying the voidstorages colletion and passing it into batches. */
-			List<List<VoidStorage>> batches = Lists.partition(Lists.newArrayList(data.getVoidStorages()), 40);
-			this.saveChestsPartially(name, batches, file);
+			List<List<VoidStorage>> batches = Lists.partition(data.getVoidStorages(), 20);
+			this.saveChestsPartially(data, batches, file, maxSize);
 
 		}
 
 	}
 
-	private void saveFileAsync() {
-		Bukkit.getScheduler().runTaskAsynchronously(this.core, FileManager.getInstance().getPlayerBase()::saveFile);
-	}
+	private int count = 0;
 
-	private void saveChestsPartially(String name, List<List<VoidStorage>> batches, final FileConfiguration file) {
+	private void saveChestsPartially(PlayerData data, List<List<VoidStorage>> batches, final FileConfiguration file,
+			final int maxSize) {
 
-		new BukkitRunnable() {
+		final String name = data.getName();
+
+		BukkitTask task = new BukkitRunnable() {
 			int i = 0;
+			int element = 0;
 
 			@Override
 			public void run() {
 
-				if (batches.isEmpty()) {
-					FileManager.getInstance().getPlayerBase().saveFile();
+				if (element == batches.size()) {
+
+					if (++count == maxSize) {
+						count = 0;
+						FileManager.getInstance().getPlayerBase().saveFile();
+						saving.clear();
+					}
+
+					if (VoidChestPlugin.isDebugEnabled()) {
+						System.out.println("Finished saving for: " + name);
+					}
+					partitionTasks.remove(name);
 					this.cancel();
 					return;
 				}
 
-				final List<VoidStorage> toSave = batches.get(0);
+				final List<VoidStorage> toSave = batches.get(element++);
 				for (VoidStorage chest : toSave) {
 
 					if (!file.isSet("Players." + name + ".chests." + i)) {
@@ -92,7 +123,10 @@ public class SaveTask extends BukkitRunnable {
 				}
 
 			}
-		}.runTaskTimer(this.core, 2l, 2l);
+		}.runTaskTimer(this.core, 1l, 4l);
+
+		partitionTasks.put(name, task);
+
 	}
 
 	private void saveChestsInFile(final VoidStorage chest, final ConfigurationSection sect) {

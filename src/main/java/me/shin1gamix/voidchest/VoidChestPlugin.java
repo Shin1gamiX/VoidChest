@@ -38,8 +38,6 @@ import me.shin1gamix.voidchest.voidmanager.VoidStorageManager;
 
 public class VoidChestPlugin extends JavaPlugin {
 
-
-
 	private static VoidChestPlugin plugin;
 
 	public static VoidChestPlugin getInstance() {
@@ -92,11 +90,10 @@ public class VoidChestPlugin extends JavaPlugin {
 		new MetricsHandler(this).setupMetrics();
 		UpdateCheckTask.startTask(this);
 
-
 		Bukkit.getScheduler().runTaskLater(this, () -> {
 			pdm.loadPlayerDatas();
 			this.voidEconomyManager.hookVoidEcon();
-		}, 1l);	
+		}, 1l);
 
 		final String result = (System.currentTimeMillis() - startTime) + "ms";
 		map.put("%result%", result);
