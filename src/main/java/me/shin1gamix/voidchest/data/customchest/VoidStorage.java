@@ -25,10 +25,10 @@ import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.data.PlayerData;
 import me.shin1gamix.voidchest.data.customchest.items.VoidIcon;
 import me.shin1gamix.voidchest.data.customchest.items.VoidIconManager;
-import me.shin1gamix.voidchest.events.VoidChestHologramUpdateEvent;
+import me.shin1gamix.voidchest.data.customchest.options.VoidStorageMenu;
 import me.shin1gamix.voidchest.utilities.Utils;
 
-public class VoidStorage {
+public class VoidStorage implements Cloneable {
 
 	private final String name;
 
@@ -36,7 +36,7 @@ public class VoidStorage {
 	private final PlayerData data;
 
 	private final Inventory customInventory;
-	private final Inventory menuInventory;
+	private final VoidStorageMenu menuInventory;
 
 	private double money = 0.0;
 	private long itemsSold = 0;
@@ -73,13 +73,7 @@ public class VoidStorage {
 		this.customInventory = Bukkit.createInventory(null, customSize * 9,
 				Utils.colorize(Utils.placeHolder(customInvName, map, false)));
 
-		int menuSize = Math.min(Math.abs(voidInventory.getInt("VoidChests." + name + ".Menu-Inventory.rows", 4)), 6);
-		menuSize = menuSize == 0 ? 6 : menuSize;
-		final String menuInvName = voidInventory.getString("VoidChests." + name + ".Menu-Inventory.name",
-				"%owner%'s VoidChest");
-
-		this.menuInventory = Bukkit.createInventory(null, menuSize * 9,
-				Utils.colorize(Utils.placeHolder(menuInvName, map, false)));
+		this.menuInventory = new VoidStorageMenu(this);
 
 		this.location = block.getLocation();
 	}
@@ -105,7 +99,7 @@ public class VoidStorage {
 
 	public void updateHologram() {
 		final VoidChestPlugin vc = VoidChestPlugin.getInstance();
-		if (!vc.isHdSupport()) {
+		if (!vc.isHolographicDisplaysSupport()) {
 			return;
 		}
 
@@ -128,7 +122,7 @@ public class VoidStorage {
 		map.put("%booster%", this.getBoosterString());
 
 		final long cooldown = this.data.getAttemptSaleTime() - System.currentTimeMillis();
-		long result = (long) Math.ceil(cooldown / 1000 + 1);
+		long result = (long) Math.ceil(cooldown / 1000 + 1d);
 		if (result > 0) {
 			map.put("%timeleft%", Utils.convertSeconds(result));
 		} else {
@@ -138,27 +132,19 @@ public class VoidStorage {
 		final FileManager fm = FileManager.getInstance();
 		FileConfiguration voidFile = fm.getVoidInventory().getFile();
 
-		final VoidChestHologramUpdateEvent event = new VoidChestHologramUpdateEvent(this,
-				voidFile.getStringList("VoidChests." + this.name + ".Storage.hologram.text"));
-		Bukkit.getPluginManager().callEvent(event);
-		if (event.getLines().isEmpty()) {
-			this.setHologramActivated(false);
-			this.update();
-			this.updateHologram();
-			return;
-		}
+		final List<String> lines = voidFile.getStringList("VoidChests." + this.name + ".Storage.hologram.text");
 
 		if (this.holo == null) {
 			this.holo = HologramsAPI.createHologram(vc, this.getLocation().add(0.5,
 					voidFile.getDouble("VoidChests." + this.name + ".Storage.hologram.height", 3.25), 0.5));
-			for (final String key : event.getLines()) {
+			for (final String key : lines) {
 				this.holo.appendTextLine(Utils.placeHolder(Utils.colorize(key), map, false));
 			}
 		}
 
 		/* We will be setting the lines using this "hacky way". */
 		int i = 0;
-		for (final String key : event.getLines()) {
+		for (final String key : lines) {
 			for (String placeholder : map.keySet()) {
 				if (key.contains(placeholder)) {
 					TextLine line = (TextLine) this.holo.getLine(i);
@@ -176,7 +162,7 @@ public class VoidStorage {
 		custInvView.removeAll(copy);
 		copy.forEach(HumanEntity::closeInventory);
 
-		List<HumanEntity> menuInvView = this.menuInventory.getViewers();
+		List<HumanEntity> menuInvView = this.menuInventory.getInventory().getViewers();
 		copy = Lists.newArrayList(menuInvView);
 		menuInvView.removeAll(copy);
 		copy.forEach(HumanEntity::closeInventory);
@@ -205,13 +191,13 @@ public class VoidStorage {
 	public String getPermissionBreak() {
 		final FileManager fm = FileManager.getInstance();
 		FileConfiguration voidFile = fm.getVoidInventory().getFile();
-		return voidFile.getString("VoidChests." + this.name + ".Permissions.break", "voidchest.break");
+		return voidFile.getString("VoidChests." + this.name + ".Permissions.break.node", "voidchest.break");
 	}
 
 	public String getPermissionPlace() {
 		final FileManager fm = FileManager.getInstance();
 		FileConfiguration voidFile = fm.getVoidInventory().getFile();
-		return voidFile.getString("VoidChests." + this.name + ".Permissions.place", "voidchest.place");
+		return voidFile.getString("VoidChests." + this.name + ".Permissions.place.node", "voidchest.place");
 	}
 
 	public Inventory getBlockInventory() {
@@ -226,6 +212,7 @@ public class VoidStorage {
 
 	public void update() {
 		VoidIconManager.getInstance().loadItems(this);
+		this.updateHologram();
 	}
 
 	/**
@@ -295,7 +282,7 @@ public class VoidStorage {
 	 * @return the menuInventory
 	 */
 	public Inventory getMenuInventory() {
-		return menuInventory;
+		return menuInventory.getInventory();
 	}
 
 	/**
@@ -383,6 +370,15 @@ public class VoidStorage {
 
 	public void setItemsPurged(long itemsPurged) {
 		this.itemsPurged = itemsPurged;
+	}
+
+	@Override
+	public VoidStorage clone() {
+		try {
+			return (VoidStorage) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new Error(e);
+		}
 	}
 
 }

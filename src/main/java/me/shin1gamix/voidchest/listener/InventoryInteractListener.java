@@ -1,7 +1,6 @@
 package me.shin1gamix.voidchest.listener;
 
-import java.util.Optional;
-
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,16 +32,14 @@ public class InventoryInteractListener implements Listener {
 		final Player p = e.getPlayer();
 
 		final Block block = e.getClickedBlock();
-		if (!this.core.getVoidManager().isChest(block)) {
+		if (block.getType() != Material.CHEST) {
 			return;
 		}
 
-		final Optional<VoidStorage> voidStorageOpt = this.core.getVoidManager().getVoidStorage(block);
-		if (!voidStorageOpt.isPresent()) {
+		final VoidStorage voidStorage = this.core.getVoidManager().getVoidStorage(block);
+		if (voidStorage == null) {
 			return;
 		}
-
-		final VoidStorage voidStorage = voidStorageOpt.get();
 
 		/* The player is sneaking, allow them to open the chest's inventory? */
 		if (p.isSneaking()) {

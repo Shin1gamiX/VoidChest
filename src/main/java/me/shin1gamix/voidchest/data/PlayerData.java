@@ -1,7 +1,7 @@
 package me.shin1gamix.voidchest.data;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -16,12 +16,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 
 import me.shin1gamix.voidchest.VoidChestPlugin;
+import me.shin1gamix.voidchest.configuration.CFG;
 import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
-import me.shin1gamix.voidchest.runnables.SellTask;
+import me.shin1gamix.voidchest.tasks.SellTask;
 import me.shin1gamix.voidchest.utilities.Utils;
 
 public class PlayerData {
@@ -38,7 +39,7 @@ public class PlayerData {
 
 	private long attemptSaleTime = 0;
 
-	private final Set<VoidStorage> chests = Sets.newHashSet();
+	private final List<VoidStorage> chests = Lists.newArrayList();
 	private final UUID uuid;
 
 	public PlayerData(final UUID uuid, final String name) {
@@ -106,7 +107,16 @@ public class PlayerData {
 		this.sendMessage = sendMessage;
 	}
 
-	public void terminate() {
+	/**
+	 * Saves all data related to this object in file.
+	 * 
+	 * Warning: you are required to save the file being manipulated after using this
+	 * method.
+	 * 
+	 * @see CFG#saveFile() from {@link FileManager#getPlayerBase()}
+	 * 
+	 */
+	public void loadToFile() {
 		FileConfiguration file = FileManager.getInstance().getPlayerBase().getFile();
 		String name = getOwner().getName();
 		file.set("Players." + name, null);
@@ -131,6 +141,9 @@ public class PlayerData {
 		}
 	}
 
+	/*
+	 * Simplified this in a different private method so as to keep things clean.
+	 */
 	private void saveChestsInFile(final FileConfiguration file, final VoidStorage chest, final int i) {
 		final Inventory custInv = chest.getCustomInventory();
 		for (int x = 0; x < custInv.getSize(); x++) {
@@ -142,31 +155,33 @@ public class PlayerData {
 		}
 	}
 
-	public void init() {
+	/*
+	 * This will load all data related to this player information.
+	 */
+
+	public void init(final boolean saveFile, final boolean deletePath) {
 		final FileConfiguration file = FileManager.getInstance().getPlayerBase().getFile();
 
-		String name = getOwner().getName();
-
-		if (!file.isSet("Players." + name)) {
+		if (!file.isSet("Players." + this.name)) {
 			return;
 		}
 
-		this.setBooster(file.getDouble("Players." + name + ".booster.multiplier", 1d));
-		this.setBoostTime(file.getLong("Players." + name + ".booster.time", 0));
+		this.setBooster(file.getDouble("Players." + this.name + ".booster.multiplier", 1d));
+		this.setBoostTime(file.getLong("Players." + this.name + ".booster.time", 0l));
 
-		/* No data to load from. */
-		if (!file.isSet("Players." + name + ".chests")) {
+		final ConfigurationSection sect = file.getConfigurationSection("Players." + this.name + ".chests");
+		if (sect == null) {
 			return;
 		}
 
-		final ConfigurationSection sect = file.getConfigurationSection("Players." + name + ".chests");
 		for (final String key : sect.getKeys(false)) {
 			final Location loc = (Location) sect.get(key + ".location");
 			if (loc == null) {
 				continue;
 			}
+
 			final Block block = loc.getBlock();
-			if (!VoidChestPlugin.getInstance().getVoidManager().isChest(block)) {
+			if (block.getType() != Material.CHEST) {
 				continue;
 			}
 
@@ -193,8 +208,13 @@ public class PlayerData {
 			chest.update();
 
 		}
-		file.set("Players." + name, null);
-		FileManager.getInstance().getPlayerBase().saveFile();
+
+		if (deletePath) {
+			file.set("Players." + name, null);
+		}
+		if (saveFile) {
+			FileManager.getInstance().getPlayerBase().saveFile();
+		}
 	}
 
 	public void attemptStartSellTask() {
@@ -202,7 +222,7 @@ public class PlayerData {
 			return;
 		}
 		final long delay = FileManager.getInstance().getOptions().getFile().getLong("Sell.interval", 15);
-		this.task = new SellTask(this, delay).runTaskTimer(VoidChestPlugin.getInstance(), delay * 20, delay * 20);
+		this.task = new SellTask(this).runTaskTimer(VoidChestPlugin.getInstance(), delay * 20 + (20), delay * 20);
 	}
 
 	public void attemptStopSellTask() {
@@ -213,7 +233,7 @@ public class PlayerData {
 		this.task = null;
 	}
 
-	public Set<VoidStorage> getVoidStorages() {
+	public List<VoidStorage> getVoidStorages() {
 		return this.chests;
 	}
 

@@ -32,11 +32,11 @@ public enum MessagesUtil {
 	VOIDCHEST_LIMIT_REACHED("VoidChest.Limit-Reached",
 			"&c&l(!) &cYou have reached the maximum limit for placed void chests."),
 
-	VOIDCHEST_GIVE("VoidChest.Give", "&a&l(!) &aYou have given &7%player% %amount%x &3void chests&a."),
+	VOIDCHEST_GIVE("VoidChest.Give", "&a&l(!) &aYou have given &7%player% %amount%x %voidchest% &3voidchest(s)&a."),
 
 	VOIDCHEST_GIVE_INVALID("VoidChest.Give-Invalid", "&c&l(!) &cNo voidchest by the name &e%voidchest% &cexists."),
 
-	VOIDCHEST_RECEIVE("VoidChest.Receive", "&a&l(!) &aYou have received &7%amount%x &3void chests&a."),
+	VOIDCHEST_RECEIVE("VoidChest.Receive", "&a&l(!) &aYou have received &7%amount%x %voidchest% &3voidchest(s)&a."),
 
 	VOIDCHEST_LIST("VoidChest.List", "&7&l(!) &7Currently &e%amount% &7voidchests loaded: &e%voidchests%"),
 

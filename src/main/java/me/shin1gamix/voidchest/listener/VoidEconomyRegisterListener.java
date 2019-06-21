@@ -13,7 +13,6 @@ import com.google.common.collect.Lists;
 
 import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.ecomanager.VoidEconomy;
-import me.shin1gamix.voidchest.utilities.DebugUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
 
 public class VoidEconomyRegisterListener implements Listener {
@@ -28,11 +27,11 @@ public class VoidEconomyRegisterListener implements Listener {
 		if (event.getProvider().getService() != VoidEconomy.class) {
 			return;
 		}
-
-		final boolean debug = DebugUtil.isDebugEnabled();
-
+		
+		final boolean debug = VoidChestPlugin.isDebugEnabled();
+		
 		final List<String> debugging = Lists.newArrayList();
-
+		
 		if (debug) {
 			debugging.add("A plugin has attemted to register their api in the server, details are shown below.");
 			try {
@@ -42,23 +41,23 @@ public class VoidEconomyRegisterListener implements Listener {
 				debugging.add(e.getMessage());
 			}
 		}
-
+		
 		RegisteredServiceProvider<VoidEconomy> provider = null;
 		for (final RegisteredServiceProvider<VoidEconomy> registered : Bukkit.getServicesManager()
 				.getRegistrations(VoidEconomy.class)) {
-
+			
 			if (provider == null) {
 				provider = registered;
 				continue;
 			}
-
+			
 			int compare = provider.compareTo(registered);
-			if (compare == 1 || compare == 0) {
+			if (compare >= 0) {
 				provider = registered;
 			}
-
+			
 		}
-
+		
 		if (provider == null) {
 			if (debug) {
 				debugging.add("Couldn't add the api.");
@@ -66,7 +65,7 @@ public class VoidEconomyRegisterListener implements Listener {
 			}
 			return;
 		}
-
+		
 		final VoidEconomy econ = provider.getProvider();
 		if (debug) {
 			debugging.add("registered an api: " + econ.getName());

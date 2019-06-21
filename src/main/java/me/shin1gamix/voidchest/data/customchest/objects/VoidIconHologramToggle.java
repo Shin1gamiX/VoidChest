@@ -20,7 +20,6 @@ public class VoidIconHologramToggle extends VoidIcon {
 		final VoidStorage voidStorage = super.getVoidStorage();
 		voidStorage.setHologramActivated(!voidStorage.isHologramActivated());
 		voidStorage.update();
-		voidStorage.updateHologram();
 	}
 
 }

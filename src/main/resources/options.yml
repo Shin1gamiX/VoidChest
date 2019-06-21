@@ -1,25 +1,15 @@
-# ################################################################################ #
-#                                                                                  #
 # __      ______ _____ _____   _____ _    _ ______  _____ _______                  #
 # \ \    / / __ \_   _|  __ \ / ____| |  | |  ____|/ ____|__   __|                 #
 #  \ \  / / |  | || | | |  | | |    | |__| | |__  | (___    | |                    # 
 #   \ \/ /| |  | || | | |  | | |    |  __  |  __|  \___ \   | |                    #
 #    \  / | |__| || |_| |__| | |____| |  | | |____ ____) |  | |                    #
 #     \/   \____/_____|_____/ \_____|_|  |_|______|_____/   |_|                    #
-#                                                                                  #
-# ################################################################################ #
  
 
-
-
-# ***********************************************************************************
-#
 # These sounds are played every time the player does something specific or
 # whenever a certain action is done such as whenever a voidchest sells items.
 #
 # If no valid sound is found for any of these, no sound will be played at all.
-#
-# ***********************************************************************************
 Sounds:
   voidchest-sell: LEVEL_UP
   voidchest-place: LEVEL_UP
@@ -27,13 +17,8 @@ Sounds:
 
 
 
-
-# ##################################################################################
-#
 # These messages are sent every time the player does a certain action.
 # An example would be whenever the player breaks a voidchest, places etc.
-#
-# ##################################################################################
 Messages:
   voidchest-break:
     enabled: true
@@ -49,8 +34,6 @@ Messages:
 
 
 
-# ***********************************************************************************
-#
 # Limit how many voidchests a player can place.
 # Bypass permission is: 'voidchest.limit.bypass'
 #
@@ -58,8 +41,6 @@ Messages:
 # in order for them to be able to place X amount of voidchests. <?> is one
 # of the names below (vip, admin, etc). By default, players will have the default amount.
 # If the default amount doesn't exist, the limit will automatically be 5.
-#
-# ***********************************************************************************
 Player:
   voidchest:
     limit:
@@ -68,29 +49,31 @@ Player:
       admin: 20
 
 
+# The amount in ticks voidchest holograms should update.
+# Set enabled to false if you'd like to disable this.
+# It is suggested to keep this as true and a low interval
+# if you have a countdown timer in the hologram.
+Hologram:
+  enabled: true
+  interval: 5
 
 
 
-# ***********************************************************************************
-#
 # The amount of seconds the plugin should attempt to save all voidchests in file.
-# This is to ensure that in case of a crash, voidchest (statistics and etc) are not lost.
+# This is to ensure that in case of a crash, voidchest (statistics and data) are not lost.
 #
 # In order to disable, set 'enabled' to false.
-# If you are having performance issues either set the task to 'async' 
-# or increase the interval.
+# If you are having performance issues increase the interval.
+#
+# If you are having no crash related issues, disable this.
 #
 # The interval is being run in seconds.
-#
-# ***********************************************************************************
 Saving:
-  interval: 45
-  enabled: true
+  interval: 90
+  enabled: false
 
 
 
-# ***********************************************************************************
-#
 # The amount of ticks the plugin should attempt to purge broken voidchests ingame. 
 # This is to ensure that if a voidchest is broken by an explosion or third party
 # plugins, all data related to this voidchest are removed.
@@ -101,14 +84,12 @@ Saving:
 # This task is run sync (in the main thread).
 #
 # The interval is being run in ticks.
-#
-# ***********************************************************************************
 Purging:
-  interval: 100 
+  interval: 100
+  enabled: true
 
 
-# ***********************************************************************************
-#
+
 # ignore-item-meta explanation: should the item meta be ignored? If this is set to
 # false, if an item has any item meta (lore, enchant, etc), it will not be considered
 # as a sellable and will be removed if you have the purge option to true.
@@ -128,8 +109,6 @@ Purging:
 # As for custom, in order to use this you'll have to create your own plugin that
 # implements a specific interface and then apply that class on startup. This way,
 # if you have the mode as "custom", your custom's plugin sell logic should be applied.
-#
-# ***********************************************************************************
 Sell:
   interval: 15
   mode: voidchest

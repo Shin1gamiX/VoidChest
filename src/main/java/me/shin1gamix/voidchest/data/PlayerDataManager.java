@@ -35,12 +35,11 @@ public final class PlayerDataManager implements Listener {
 
 	public void loadPlayerDatas() {
 
-		this.playerDataMap.values().forEach(value -> value.attemptStopSellTask());
-
+		this.playerDataMap.values().forEach(PlayerData::attemptStopSellTask);
 		this.playerDataMap.clear();
 
 		Bukkit.getOnlinePlayers().forEach(online -> {
-			final PlayerData data = this.loadPlayerData(online);
+			final PlayerData data = this.loadPlayerData(online, false, false);
 			data.attemptStartSellTask();
 		});
 
@@ -48,11 +47,13 @@ public final class PlayerDataManager implements Listener {
 		final ConfigurationSection sect = file.getConfigurationSection("Players");
 		if (sect != null) {
 			for (final String key : sect.getKeys(false)) {
-				final PlayerData data = this.loadPlayerData(UUID.fromString(sect.getString(key + ".uuid")), key);
+				final PlayerData data = this.loadPlayerData(UUID.fromString(sect.getString(key + ".uuid")), key, false,
+						false);
 				data.attemptStartSellTask();
 			}
 		}
 
+		FileManager.getInstance().getPlayerBase().saveFile();
 	}
 
 	public void savePlayerDatas(final boolean stopTask, boolean closeInventories) {
@@ -64,11 +65,12 @@ public final class PlayerDataManager implements Listener {
 				data.closeVoidStorageInventories();
 			}
 
-			data.terminate();
+			data.loadToFile();
 		}
 	}
 
-	public PlayerData loadPlayerData(final UUID uuid, final String name) {
+	public PlayerData loadPlayerData(final UUID uuid, final String name, final boolean saveFile,
+			final boolean deletePath) {
 		PlayerData data = this.playerDataMap.get(uuid);
 		if (data == null) {
 			if (name == null) {
@@ -76,14 +78,21 @@ public final class PlayerDataManager implements Listener {
 						+ " seems to have an invalid name. Is the player database corrupt?");
 			}
 			data = new PlayerData(uuid, name);
-			data.init();
+			data.init(saveFile, deletePath);
+			data.setAttemptSaleTime(System.currentTimeMillis()
+					+ (FileManager.getInstance().getOptions().getFile().getLong("Sell.interval", 15)) * 1000);
 			playerDataMap.put(uuid, data);
 		}
 		return data;
 	}
 
+	public PlayerData loadPlayerData(final OfflinePlayer offlinePlayer, final boolean saveFile,
+			final boolean deletePath) {
+		return this.loadPlayerData(offlinePlayer.getUniqueId(), offlinePlayer.getName(), saveFile, deletePath);
+	}
+
 	public PlayerData loadPlayerData(final OfflinePlayer offlinePlayer) {
-		return this.loadPlayerData(offlinePlayer.getUniqueId(), offlinePlayer.getName());
+		return this.loadPlayerData(offlinePlayer, false, false);
 	}
 
 	public PlayerData getPlayerData(final VoidStorage chest) {
@@ -92,7 +101,7 @@ public final class PlayerDataManager implements Listener {
 
 	@EventHandler
 	private void onJoin(final PlayerJoinEvent e) {
-		final PlayerData data = this.loadPlayerData(e.getPlayer().getUniqueId(), e.getPlayer().getName());
+		final PlayerData data = this.loadPlayerData(e.getPlayer().getUniqueId(), e.getPlayer().getName(), true, true);
 		data.recalculateOwner();
 		data.attemptStartSellTask();
 	}

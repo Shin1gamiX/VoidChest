@@ -16,12 +16,18 @@ VoidChests:
   Normal:
   
     Booster: 1.0 # Formula: (ItemPrice * boost)
-    
+        
     # If this path is removed, permissions default back to
     # voidchest.break & voidchest.place
     Permissions:
-      break: voidchest.break.normal
-      place: voidchest.place.normal
+      break:
+        node: voidchest.break.normal
+        message:
+        - '&c&l(!) &cYou do not have permission to break a &7%voidchest% &ctype voidchest.'
+      place:
+        node: voidchest.place.normal
+        message:
+        - '&c&l(!) &cYou do not have permission to place a &7%voidchest% &ctype voidchest.' 
       
     Shift-click-open-chest: false
     
@@ -178,9 +184,15 @@ VoidChests:
     # If this path is removed, permissions default back to
     # voidchest.break & voidchest.place  
     Permissions:
-      break: voidchest.break.vip
-      place: voidchest.place.vip
-    
+      break:
+        node: voidchest.break.vip
+        message:
+        - '&c&l(!) &cYou do not have permission to break a &7%voidchest% &ctype voidchest.'
+      place:
+        node: voidchest.place.vip
+        message:
+        - '&c&l(!) &cYou do not have permission to place a &7%voidchest% &ctype voidchest.'
+            
     Shift-click-open-chest: true
     
     Storage:

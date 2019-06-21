@@ -1,7 +1,6 @@
 package me.shin1gamix.voidchest.listener;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.Iterator;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -10,8 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
-
-import com.google.common.collect.Sets;
 
 import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
@@ -27,40 +24,36 @@ public class VoidChestExplodeListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	private void onInteract(final EntityExplodeEvent e) {
 
-		Set<Block> blocksRemovall = Sets.newHashSet();
-		for (Block block : e.blockList()) {
+		Iterator<Block> itr = e.blockList().iterator();
+		while (itr.hasNext()) {
+			Block next = itr.next();
 
-			if (!this.core.getVoidManager().isChest(block)) {
-				continue;
-			}
-			blocksRemovall.add(block);
-		}
-
-		for (final Block block : blocksRemovall) {
-
-			final Optional<VoidStorage> voidStorageOpt = this.core.getVoidManager().getVoidStorage(block);
-			if (!voidStorageOpt.isPresent()) {
+			if (next.getType() != Material.CHEST) {
 				continue;
 			}
 
-			e.blockList().remove(block);
+			final VoidStorage voidStorage = this.core.getVoidManager().getVoidStorage(next);
+			if (voidStorage == null) {
+				continue;
+			}
+
+			itr.remove();
 
 			/* Let's call the break event on this voidchest. */
-			final VoidChestBreakEvent event = new VoidChestBreakEvent(e.getEntity(), voidStorageOpt.get());
+			final VoidChestBreakEvent event = new VoidChestBreakEvent(e.getEntity(), voidStorage);
 			Bukkit.getPluginManager().callEvent(event);
 			if (event.isCancelled()) {
 				continue;
 			}
 
-			VoidStorage voidStorage = event.getVoidStorage();
-			block.setType(Material.AIR);
+			VoidStorage voidStorageEvent = event.getVoidStorage();
+			next.setType(Material.AIR);
 			/* Not sure if necessary. */
-			block.getState().update(true, true);
-			voidStorage.setHologramActivated(false);
-			voidStorage.updateHologram();
-			voidStorage.closeInventories();
-			voidStorage.getPlayerData().getVoidStorages().remove(voidStorage);
-
+			next.getState().update(true, true);
+			voidStorageEvent.setHologramActivated(false);
+			voidStorageEvent.updateHologram();
+			voidStorageEvent.closeInventories();
+			voidStorageEvent.getPlayerData().getVoidStorages().remove(voidStorageEvent);
 		}
 
 	}

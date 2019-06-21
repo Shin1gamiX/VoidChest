@@ -1,7 +1,6 @@
 package me.shin1gamix.voidchest.utilities;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -30,6 +29,8 @@ public final class Utils {
 		throw new UnsupportedOperationException();
 	}
 
+
+
 	/* ----------------------------------------------------------------- */
 
 	//
@@ -42,33 +43,44 @@ public final class Utils {
 	 *            The seconds to be converted into days, hours, minutes, seconds.
 	 * @return String -> The seconds converted into d,h,m,s.
 	 */
-	public static String convertSeconds(final long input) {
-		Validate.isTrue(input > 0, "Why are you even trying to convert: " + input + "?");
+	public static String convertSeconds(long input) {
+
+		if (input < 0) {
+			new IllegalArgumentException(
+					"An attempt to convert a negative number was made for: " + input + ", making the number absolute.")
+							.printStackTrace();
+			input = Math.abs(input);
+		}
+
+		StringBuilder builder = new StringBuilder();
 
 		/* Days */
-		final int days = (int) TimeUnit.SECONDS.toDays(input);
-		StringBuilder builder = new StringBuilder(days > 0 ? pluralize("^# day^s", days) : "");
+		final long days = TimeUnit.SECONDS.toDays(input);
+		if (days > 0) {
+			builder.append(pluralize("^# day^s", days));
+		}
 
 		/* Hours */
-		final int hours = (int) (TimeUnit.SECONDS.toHours(input) - TimeUnit.DAYS.toHours(days));
+		final long hours = (TimeUnit.SECONDS.toHours(input) - TimeUnit.DAYS.toHours(days));
 		builder.append(hours > 0 ? (builder.toString().equals("") ? "" : ", ") + pluralize("^# hour^s", hours) : "");
 
 		/* Minutes */
-		final int minutes = (int) (TimeUnit.SECONDS.toMinutes(input) - TimeUnit.HOURS.toMinutes(hours)
+		final long minutes = (TimeUnit.SECONDS.toMinutes(input) - TimeUnit.HOURS.toMinutes(hours)
 				- TimeUnit.DAYS.toMinutes(days));
 		builder.append(
 				minutes > 0 ? (builder.toString().equals("") ? "" : ", ") + pluralize("^# minute^s", minutes) : "");
 
 		/* Seconds */
-		final int seconds = (int) (TimeUnit.SECONDS.toSeconds(input) - TimeUnit.MINUTES.toSeconds(minutes)
+		final long seconds = (TimeUnit.SECONDS.toSeconds(input) - TimeUnit.MINUTES.toSeconds(minutes)
 				- TimeUnit.HOURS.toSeconds(hours) - TimeUnit.DAYS.toSeconds(days));
 		builder.append(
-				seconds > 0 ? (builder.toString().equals("") ? "" : ", ") + pluralize("^# second^s", seconds) : "");
+				seconds >= 0 ? (builder.toString().equals("") ? "" : ", ") + pluralize("^# second^s", seconds) : "");
+
 		/* Result */
 		return builder.toString();
 	}
 
-	private static String pluralize(String text, int value) {
+	private static String pluralize(String text, long value) {
 		return text.replace("^s", value > 1 ? "s" : "").replace("^#", String.valueOf(value));
 	}
 
@@ -99,7 +111,7 @@ public final class Utils {
 	}
 
 	public static boolean isList(final Object obj) {
-		return obj instanceof ArrayList;
+		return obj instanceof List;
 	}
 
 	/* ----------------------------------------------------------------- */
@@ -146,7 +158,7 @@ public final class Utils {
 		target.sendMessage(colorize(message));
 	}
 
-	public static void msg(final CommandSender target, final String[] message) {
+	public static void msg(final CommandSender target, final String... message) {
 		Validate.notNull(target, "The target can't be null");
 		if (message == null || message.length == 0) {
 			return;
@@ -192,6 +204,11 @@ public final class Utils {
 		if (isList(file, path)) {
 			msg(target, file.getStringList(path), map, replace);
 		} else {
+			final String message = file.getString(path);
+			if (message == null) {
+				new IllegalArgumentException("The path: " + path + " doesn't exist.").printStackTrace();
+				return;
+			}
 			msg(target, file.getString(path), map, replace);
 		}
 	}

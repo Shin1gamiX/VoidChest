@@ -1,13 +1,13 @@
 package me.shin1gamix.voidchest.ecomanager;
 
-import java.util.Optional;
+import javax.annotation.Nullable;
 
 public enum VoidMode {
-	CRAFT_VOIDCHEST("VoidChest"),
+	VOIDCHEST("VoidChest"),
 
-	CRAFT_SHOPGUIPLUS("ShopGUIPlus"),
+	SHOPGUIPLUS("ShopGUIPlus"),
 
-	CRAFT_ESSENTIALS("Essentials"),
+	ESSENTIALS("Essentials"),
 
 	CUSTOM("Custom"),
 
@@ -26,20 +26,17 @@ public enum VoidMode {
 		return name;
 	}
 
-	
-	
-	public static Optional<VoidMode> getByName(String input) {
+	public @Nullable static VoidMode getByName(String input) {
 		if (input == null) {
-			return Optional.empty();
+			throw new IllegalArgumentException("You can't pass a null arguement to get a VoidMode.");
 		}
 
 		for (VoidMode mode : values()) {
 			if (input.equalsIgnoreCase(mode.getName())) {
-				return Optional.of(mode);
+				return mode;
 			}
 
 		}
-		return Optional.empty();
-
+		return null;
 	}
 }

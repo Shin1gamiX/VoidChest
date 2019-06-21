@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -25,11 +26,10 @@ import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.data.PlayerData;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 import me.shin1gamix.voidchest.events.VoidChestBreakEvent;
-import me.shin1gamix.voidchest.utilities.MessagesUtil;
 import me.shin1gamix.voidchest.utilities.SoundUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
-import me.shin1gamix.voidchest.utilities.voidmanager.VoidItemManager;
-import me.shin1gamix.voidchest.utilities.voidmanager.VoidItemManager.VoidChestItemCache;
+import me.shin1gamix.voidchest.voidmanager.VoidItemManager;
+import me.shin1gamix.voidchest.voidmanager.VoidItemManager.VoidChestItemCache;
 
 public class VoidChestBreakListener implements Listener {
 	private final VoidChestPlugin core;
@@ -44,32 +44,35 @@ public class VoidChestBreakListener implements Listener {
 		final Block block = e.getBlock();
 
 		/* Not a chest? Then why even bother? */
-		if (!this.core.getVoidManager().isChest(block)) {
+		if (block.getType() != Material.CHEST) {
 			return;
 		}
 
 		/* Is this chest a voidchest? */
-		final Optional<VoidStorage> voidStorageOptional = this.core.getVoidManager().getVoidStorage(block);
-		if (!voidStorageOptional.isPresent()) {
+		final VoidStorage voidStorage = this.core.getVoidManager().getVoidStorage(block);
+		if (voidStorage == null) {
 			return;
 		}
 
 		/* This is indeed a voidchest so let's stop the block from being broken. */
 		e.setCancelled(true);
 
-		final VoidStorage voidStorage = voidStorageOptional.get();
-
 		/* Does the player have the right to break this voidchest? */
 		final Player player = e.getPlayer();
 		if (!player.hasPermission(voidStorage.getPermissionBreak())) {
-			MessagesUtil.NO_PERMISSION.msg(player);
+			Map<String, String> map = Maps.newHashMap();
+			map.put("%voidchest%", voidStorage.getName());
+			final FileManager fm = FileManager.getInstance();
+			FileConfiguration voidFile = fm.getVoidInventory().getFile();
+			Utils.msg(player, voidFile, "VoidChests." + voidStorage.getName() + ".Permissions.break.message", map,
+					false);
 			return;
 		}
 
 		final Map<String, String> map = Maps.newHashMap();
 
 		/* Does this voidchest not belong to the one breaking it? */
-		if (!voidStorage.getPlayerData().getName().equals(e.getPlayer().getName())
+		if (!voidStorage.getPlayerData().getOwner().getUniqueId().equals(e.getPlayer().getUniqueId())
 				&& !player.hasPermission("voidchest.break.bypass")) {
 
 			/* Let's send them a message saying they can't break this voidchest. */

@@ -1,5 +1,7 @@
 package me.shin1gamix.voidchest.data.customchest.items;
 
+import java.util.Objects;
+
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -20,23 +22,23 @@ public abstract class VoidIcon implements Cloneable {
 
 	public abstract void execute(Player player);
 
-	public ItemStack getItem() {
+	protected ItemStack getItem() {
 		return item;
 	}
 
-	public int getSlot() {
+	protected int getSlot() {
 		return Math.abs(this.slot);
 	}
 
-	public boolean isCloseInventory() {
+	protected boolean isCloseInventory() {
 		return closeInventory;
 	}
 
-	public void setCloseInventory(boolean closeInventory) {
+	protected void setCloseInventory(boolean closeInventory) {
 		this.closeInventory = closeInventory;
 	}
 
-	public VoidStorage getVoidStorage() {
+	protected VoidStorage getVoidStorage() {
 		return this.voidStorage;
 	}
 
@@ -50,17 +52,7 @@ public abstract class VoidIcon implements Cloneable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		VoidIcon other = (VoidIcon) obj;
-		return this.slot == other.slot;
+		return this == obj || (obj instanceof VoidIcon && Objects.equals(this.slot, ((VoidIcon) obj).getSlot()));
 	}
 
 	@Override

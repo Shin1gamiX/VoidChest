@@ -7,7 +7,7 @@ import me.shin1gamix.voidchest.data.PlayerData;
 
 public interface VoidEconomy {
 
-	void sellInventory(final PlayerData data);
+	void initiateSell(final PlayerData data);
 
 	double getProfit(final ItemStack item);
 

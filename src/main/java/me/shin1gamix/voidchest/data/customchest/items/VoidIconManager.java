@@ -6,10 +6,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -20,7 +20,6 @@ import com.google.common.collect.Sets;
 
 import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.data.PlayerData;
-import me.shin1gamix.voidchest.data.customchest.VoidChestOption;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
 import me.shin1gamix.voidchest.data.customchest.objects.VoidIconAutoPurgeToggle;
 import me.shin1gamix.voidchest.data.customchest.objects.VoidIconAutoSellToggle;
@@ -28,10 +27,11 @@ import me.shin1gamix.voidchest.data.customchest.objects.VoidIconChestInventory;
 import me.shin1gamix.voidchest.data.customchest.objects.VoidIconDecorate;
 import me.shin1gamix.voidchest.data.customchest.objects.VoidIconHologramToggle;
 import me.shin1gamix.voidchest.data.customchest.objects.VoidIconVoidInventory;
+import me.shin1gamix.voidchest.data.customchest.options.VoidChestOption;
 import me.shin1gamix.voidchest.utilities.MaterialUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
 
-public class VoidIconManager {
+public final class VoidIconManager {
 
 	private VoidIconManager() {
 	}
@@ -43,13 +43,12 @@ public class VoidIconManager {
 	}
 
 	public void loadItems(final VoidStorage voidStorage) {
-
 		final Map<Integer, VoidIcon> voidStorageItems = voidStorage.getVoidItems();
 		voidStorageItems.clear();
-		voidStorage.getMenuInventory().clear();
+
+		final Inventory inventory = voidStorage.getMenuInventory();
 
 		final PlayerData data = voidStorage.getPlayerData();
-		final OfflinePlayer owner = data.getOwner();
 		final Map<String, String> replace = Maps.newHashMap();
 
 		for (VoidChestOption vca : VoidChestOption.values()) {
@@ -60,18 +59,18 @@ public class VoidIconManager {
 				replace.put("%itemssold%", Utils.formatNumber(voidStorage.getItemsSold()));
 				replace.put("%itemspurged%", Utils.formatNumber(voidStorage.getItemsPurged()));
 				replace.put("%booster%", voidStorage.getBoosterString());
-				replace.put("%owner%", owner.getName());
+				replace.put("%owner%", data.getName());
 				replace.put("%voidchest%", voidStorage.getName());
-				items = this.getItems(vca, voidStorage, replace);
+				items = this.getItems(vca, voidStorage, replace, inventory.getSize());
 				break;
 			default:
-				items = this.getItems(vca, voidStorage, null);
+				items = this.getItems(vca, voidStorage, null, inventory.getSize());
 				break;
 			}
 
 			for (VoidIcon voidItem : items) {
 				int slot = voidItem.getSlot();
-				if (slot >= voidStorage.getMenuInventory().getSize()) {
+				if (slot >= inventory.getSize()) {
 					continue;
 				}
 				voidStorage.getMenuInventory().setItem(slot, voidItem.getItem());
@@ -79,11 +78,10 @@ public class VoidIconManager {
 			}
 
 		}
-
 	}
 
-	public List<VoidIcon> getItems(VoidChestOption ability, final VoidStorage voidStorage,
-			Map<String, String> replace) {
+	public List<VoidIcon> getItems(VoidChestOption ability, final VoidStorage voidStorage, Map<String, String> replace,
+			final int maxSize) {
 		final FileManager fm = FileManager.getInstance();
 		final List<VoidIcon> sellAll = Lists.newArrayList();
 
@@ -123,7 +121,7 @@ public class VoidIconManager {
 
 			final boolean closeInv = sect.getBoolean(path + ".inventory-close", false);
 
-			final Set<Integer> slots = this.getSlots(voidStorage, ability, slotPath);
+			final Set<Integer> slots = this.getSlots(voidStorage, ability, slotPath, maxSize);
 			for (int slot : slots) {
 				final VoidIcon sel;
 				switch (ability) {
@@ -159,7 +157,8 @@ public class VoidIconManager {
 
 	}
 
-	public Set<Integer> getSlots(final VoidStorage voidStorage, VoidChestOption ability, String key) {
+	public Set<Integer> getSlots(final VoidStorage voidStorage, VoidChestOption ability, String key,
+			final int maxSize) {
 		Set<Integer> slots = Sets.newHashSet();
 		final FileManager fm = FileManager.getInstance();
 		final FileConfiguration file = fm.getVoidInventory().getFile();
@@ -171,7 +170,7 @@ public class VoidIconManager {
 		}
 
 		if (slotsInput.equalsIgnoreCase("all")) {
-			for (int i = 0; i < 54; i++) {
+			for (int i = 0; i < maxSize; i++) {
 				slots.add(i);
 			}
 			return slots;

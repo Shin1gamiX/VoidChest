@@ -64,7 +64,7 @@ public class DeveloperInformListener implements Listener {
 			}
 
 			Utils.msg(player.getPlayer(), joinMessage, replace, false);
-		}, 20 * 10);
+		}, 20l * 10l);
 
 	}
 

@@ -185,7 +185,7 @@ public class Metrics {
 				// stats collection is sync ;)
 				Bukkit.getScheduler().runTask(plugin, () -> submitData());
 			}
-		}, 1000 * 60 * 5, 1000 * 60 * 30);
+		}, 1000l * 60l * 5l, 1000l * 60l * 30l);
 		// Submit the data every 30 minutes, first time after 5 minutes to give other
 		// plugins enough time to start
 		// WARNING: Changing the frequency has no effect but your plugin WILL be
@@ -361,7 +361,8 @@ public class Metrics {
 		connection.addRequestProperty("Accept", "application/json");
 		connection.addRequestProperty("Connection", "close");
 		connection.addRequestProperty("Content-Encoding", "gzip"); // We gzip our request
-		connection.addRequestProperty("Content-Length", String.valueOf(compressedData.length));
+		connection.addRequestProperty("Content-Length",
+				String.valueOf(compressedData == null ? 0 : compressedData.length));
 		connection.setRequestProperty("Content-Type", "application/json"); // We send our data in JSON format
 		connection.setRequestProperty("User-Agent", "MC-Server/" + B_STATS_VERSION);
 

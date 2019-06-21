@@ -3,20 +3,22 @@ package me.shin1gamix.voidchest;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.ServicePriority;
+import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 import me.shin1gamix.voidchest.commands.VoidCommand;
 import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.data.PlayerDataManager;
+import me.shin1gamix.voidchest.ecomanager.VoidEconomy;
 import me.shin1gamix.voidchest.ecomanager.VoidEconomyManager;
 import me.shin1gamix.voidchest.listener.DeveloperInformListener;
 import me.shin1gamix.voidchest.listener.InventoryInteractListener;
@@ -26,17 +28,17 @@ import me.shin1gamix.voidchest.listener.VoidChestPlaceListener;
 import me.shin1gamix.voidchest.listener.VoidEconomyRegisterListener;
 import me.shin1gamix.voidchest.listener.VoidMenuClickListener;
 import me.shin1gamix.voidchest.metrics.MetricsHandler;
-import me.shin1gamix.voidchest.runnables.HologramTimerTask;
-import me.shin1gamix.voidchest.runnables.PurgeTask;
-import me.shin1gamix.voidchest.runnables.SaveTask;
-import me.shin1gamix.voidchest.runnables.UpdateCheckTask;
+import me.shin1gamix.voidchest.tasks.TaskManager;
+import me.shin1gamix.voidchest.tasks.UpdateCheckTask;
 import me.shin1gamix.voidchest.utilities.MessagesUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
-import me.shin1gamix.voidchest.utilities.voidmanager.VoidItemManager;
-import me.shin1gamix.voidchest.utilities.voidmanager.VoidManager;
 import me.shin1gamix.voidchest.vaultapi.VaultAPI;
+import me.shin1gamix.voidchest.voidmanager.VoidItemManager;
+import me.shin1gamix.voidchest.voidmanager.VoidStorageManager;
 
 public class VoidChestPlugin extends JavaPlugin {
+
+
 
 	private static VoidChestPlugin plugin;
 
@@ -45,13 +47,11 @@ public class VoidChestPlugin extends JavaPlugin {
 	}
 
 	private final VaultAPI vault = new VaultAPI(this);
-	private VoidManager voidManager = new VoidManager();
+	private VoidStorageManager voidStorageManager = new VoidStorageManager();
 	private final VoidEconomyManager voidEconomyManager = new VoidEconomyManager(this);
+	private final TaskManager taskManager = new TaskManager(this);
 
-	private boolean hdSupport = false;
-
-	private BukkitTask savingTask = null;
-	private BukkitTask purgingTask = null;
+	private boolean holographicDisplaysSupport = false;
 
 	@Override
 	public void onEnable() {
@@ -68,7 +68,7 @@ public class VoidChestPlugin extends JavaPlugin {
 		final PlayerDataManager pdm = PlayerDataManager.getInstance();
 
 		final Listener[] listeners = new Listener[] { pdm, new VoidChestBreakListener(this),
-				new VoidChestPlaceListener(this), new InventoryInteractListener(this), new VoidMenuClickListener(this),
+				new VoidChestPlaceListener(), new InventoryInteractListener(this), new VoidMenuClickListener(),
 				new VoidEconomyRegisterListener(this), new VoidChestExplodeListener(this),
 				new DeveloperInformListener(this) };
 
@@ -79,27 +79,26 @@ public class VoidChestPlugin extends JavaPlugin {
 
 		final Plugin pl = Bukkit.getPluginManager().getPlugin("HolographicDisplays");
 		if (pl != null && pl.isEnabled()) {
-			this.hdSupport = true;
+			this.holographicDisplaysSupport = true;
 		}
 
 		this.getCommand("voidchest").setExecutor(new VoidCommand(this));
 
-		new HologramTimerTask(this).runTaskTimer(this, 0l, 3l);
 		VoidItemManager.getInstance().cacheItems();
 
-		this.attemptStartSaving();
-		this.attemptStartPurging();
-
+		this.taskManager.attemptStartSaving();
+		this.taskManager.attemptStartPurging();
+		this.taskManager.attemptStartHologram();
 		new MetricsHandler(this).setupMetrics();
+		UpdateCheckTask.startTask(this);
 
-		new UpdateCheckTask(this).runTaskTimer(this, 20 * 10, (20 * 60) * 60 * 2);
 
 		Bukkit.getScheduler().runTaskLater(this, () -> {
 			pdm.loadPlayerDatas();
 			this.voidEconomyManager.hookVoidEcon();
-		}, 1);
+		}, 1l);	
 
-		final String result = String.valueOf(System.currentTimeMillis() - startTime) + "ms";
+		final String result = (System.currentTimeMillis() - startTime) + "ms";
 		map.put("%result%", result);
 		Bukkit.getScheduler().runTaskLater(this, () -> {
 			System.out.println(" ");
@@ -107,59 +106,18 @@ public class VoidChestPlugin extends JavaPlugin {
 			System.out.println(Utils.placeHolder("[VoidChest-%version%] Plugin loaded in %result%", map, false));
 			System.out.println(" ");
 			System.out.println(" ");
-		}, 20 * 5);
-
-	}
-
-	public void attemptStartSaving() {
-		if (this.savingTask != null) {
-			this.savingTask.cancel();
-			this.savingTask = null;
-		}
-		FileConfiguration options = FileManager.getInstance().getOptions().getFile();
-		if (!options.getBoolean("Saving.enabled", false)) {
-			return;
-		}
-
-		final long interval = options.getLong("Saving.interval", 30);
-
-		this.savingTask = new SaveTask().runTaskTimer(this, 100, interval * 20);
-	}
-
-	public void attemptStartPurging() {
-		if (this.purgingTask != null) {
-			this.purgingTask.cancel();
-			this.purgingTask = null;
-		}
-		FileConfiguration options = FileManager.getInstance().getOptions().getFile();
-		if (!options.getBoolean("Purging.enabled", true)) {
-			return;
-		}
-
-		final long interval = options.getLong("Purging.interval", 100);
-		final PurgeTask task = new PurgeTask(this);
-		this.purgingTask = options.getBoolean("Purging.task-async", false)
-				? task.runTaskTimerAsynchronously(this, 100, interval)
-				: task.runTaskTimer(this, 100, interval);
+		}, 20l * 5);
 
 	}
 
 	@Override
 	public void onDisable() {
-		if (this.savingTask != null) {
-			this.savingTask.cancel();
-			this.savingTask = null;
-		}
-
-		if (this.purgingTask != null) {
-			this.purgingTask.cancel();
-			this.purgingTask = null;
-		}
+		this.taskManager.disableAll();
 
 		PlayerDataManager.getInstance().savePlayerDatas(true, true);
 		FileManager.getInstance().getPlayerBase().saveFile();
 		Bukkit.getServicesManager().unregisterAll(this);
-		if (this.hdSupport) {
+		if (this.holographicDisplaysSupport) {
 			HologramsAPI.getHolograms(this).forEach(Hologram::delete);
 		}
 	}
@@ -174,8 +132,8 @@ public class VoidChestPlugin extends JavaPlugin {
 	/**
 	 * @return the vm
 	 */
-	public VoidManager getVoidManager() {
-		return this.voidManager;
+	public VoidStorageManager getVoidManager() {
+		return this.voidStorageManager;
 	}
 
 	/**
@@ -185,12 +143,40 @@ public class VoidChestPlugin extends JavaPlugin {
 		return voidEconomyManager;
 	}
 
-	public boolean isHdSupport() {
-		return hdSupport;
+	public boolean isHolographicDisplaysSupport() {
+		return holographicDisplaysSupport;
 	}
 
-	public void setHdSupport(boolean hdSupport) {
-		this.hdSupport = hdSupport;
+	public void setHolographicDisplaysSupport(boolean holographicDisplaysSupport) {
+		this.holographicDisplaysSupport = holographicDisplaysSupport;
+	}
+
+	public boolean hookVoidEconomy(VoidEconomy instance, final ServicePriority priority, final JavaPlugin plugin) {
+		Preconditions.checkNotNull(instance, "The VoidEconomy instance provided may not be null.");
+		Preconditions.checkNotNull(instance.getName(), "The VoidEconomy instance's name provided may not be null.");
+		Preconditions.checkNotNull(priority, "The ServicePriority instance may not be null.");
+		Preconditions.checkNotNull(plugin, "The JavaPlugin instance can't be null!");
+		final VoidChestPlugin vc = VoidChestPlugin.getInstance();
+
+		if (instance.isVaultDependent()) {
+			if (!vc.getVault().setupEconomy()) {
+				Bukkit.getPluginManager().disablePlugin(vc);
+				throw new RuntimeException(
+						"The current VoidEconomy instance is vault dependent and no vault instance has been located. Disabling VoidChest...");
+			}
+		}
+
+		final ServicesManager sm = vc.getServer().getServicesManager();
+		sm.register(VoidEconomy.class, instance, vc, priority);
+		return true;
+	}
+
+	public static boolean isDebugEnabled() {
+		return FileManager.getInstance().getOptions().getFile().getBoolean("Debugging", false);
+	}
+
+	public TaskManager getTaskManager() {
+		return taskManager;
 	}
 
 }

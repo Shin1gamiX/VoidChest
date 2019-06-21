@@ -2,7 +2,6 @@ package me.shin1gamix.voidchest.metrics;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.configuration.FileManager;
@@ -31,19 +30,18 @@ public class MetricsHandler {
 		final Metrics metrics = new Metrics(this.core);
 
 		metrics.addCustomChart(new Metrics.SimplePie("modes", () -> {
-			final Optional<VoidMode> optional = VoidMode
+			final VoidMode mode = VoidMode
 					.getByName(FileManager.getInstance().getOptions().getFile().getString("Sell.mode"));
-			if (optional.isPresent()) {
-				return optional.get().getName();
-			}
-			return VoidMode.CRAFT_VOIDCHEST.getName();
+			return mode != null ? mode.getName() : VoidMode.VOIDCHEST.getName();
 		}));
 
 		int purges = 0;
 		int sell = 0;
 		int holo = 0;
+		int total = 0;
 		for (final PlayerData data : PlayerDataManager.getInstance().getPlayerDatas().values()) {
 			for (final VoidStorage storage : data.getVoidStorages()) {
+				++total;
 				if (storage.isAutoSell())
 					++sell;
 				if (storage.isHologramActivated())
@@ -56,11 +54,13 @@ public class MetricsHandler {
 		final int purgeRes = purges;
 		final int sellRes = sell;
 		final int holoRes = holo;
+		final int totalRes = total;
 		metrics.addCustomChart(new Metrics.AdvancedPie("chest_options", () -> {
 			final Map<String, Integer> valueMap = new HashMap<>();
 			valueMap.put("purge", purgeRes);
 			valueMap.put("auto-sell", sellRes);
 			valueMap.put("holograms", holoRes);
+			valueMap.put("total", totalRes);
 			return valueMap;
 		}));
 	}

@@ -1759,6 +1759,11 @@ public enum MaterialUtil {
 			return true;
 		}
 		MaterialUtil xmat = fromMaterial(comp.getType());
+
+		if (xmat == null) {
+			return false;
+		}
+
 		if (xmat.isDamageable()) {
 			if (this.parseMaterial() == comp.getType()) {
 				return true;
