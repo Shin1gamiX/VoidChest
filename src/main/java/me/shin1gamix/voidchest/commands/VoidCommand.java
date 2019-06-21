@@ -16,6 +16,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -26,13 +27,20 @@ import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.data.PlayerData;
 import me.shin1gamix.voidchest.data.PlayerDataManager;
 import me.shin1gamix.voidchest.data.customchest.VoidStorage;
+import me.shin1gamix.voidchest.ecomanager.VoidEconomy;
 import me.shin1gamix.voidchest.ecomanager.VoidMode;
+import me.shin1gamix.voidchest.tasks.TaskManager;
 import me.shin1gamix.voidchest.utilities.MaterialUtil;
 import me.shin1gamix.voidchest.utilities.MessagesUtil;
 import me.shin1gamix.voidchest.utilities.Utils;
-import me.shin1gamix.voidchest.utilities.voidmanager.VoidItemManager;
-import me.shin1gamix.voidchest.utilities.voidmanager.VoidItemManager.VoidChestItemCache;
+import me.shin1gamix.voidchest.voidmanager.VoidItemManager;
+import me.shin1gamix.voidchest.voidmanager.VoidItemManager.VoidChestItemCache;
 
+/**
+ * All commands are listed below. In order to avoid having everything into one
+ * method (onCommand()), things are splitted into different methods and they are
+ * being handled there.
+ */
 public final class VoidCommand implements CommandExecutor {
 
 	private final VoidChestPlugin core;
@@ -136,7 +144,7 @@ public final class VoidCommand implements CommandExecutor {
 			return;
 		}
 
-		final PlayerData data = PlayerDataManager.getInstance().loadPlayerData(target);
+		final PlayerData data = PlayerDataManager.getInstance().loadPlayerData(target, true, false);
 
 		final long boostTime = Long.parseLong(boostTimeInput);
 
@@ -146,7 +154,6 @@ public final class VoidCommand implements CommandExecutor {
 		}
 
 		final long result = System.currentTimeMillis() + (1000 * boostTime);
-		System.out.println(result);
 		data.setBoostTime(result);
 		data.setBooster(boost);
 
@@ -157,6 +164,48 @@ public final class VoidCommand implements CommandExecutor {
 
 	}
 
+	private void reload(CommandSender cs) {
+
+		if (!cs.hasPermission("voidchest.reload")) {
+			MessagesUtil.NO_PERMISSION.msg(cs);
+			return;
+		}
+
+		if (this.core.isHolographicDisplaysSupport()) {
+			HologramsAPI.getHolograms(this.core).forEach(Hologram::delete);
+		}
+
+		CFG.reloadFiles();
+		VoidItemManager.getInstance().cacheItems();
+		final FileManager fm = FileManager.getInstance();
+		MessagesUtil.repairPaths(fm.getMessages());
+
+		Bukkit.getServicesManager().unregister(VoidEconomy.class, this.core);
+		this.core.getVoidEconomyManager().hookVoidEcon();
+
+		PlayerDataManager.getInstance().savePlayerDatas(true, true);
+		fm.getPlayerBase().saveFile();
+		PlayerDataManager.getInstance().loadPlayerDatas();
+
+		TaskManager tm = this.core.getTaskManager();
+		tm.attemptStartSaving();
+		tm.attemptStartPurging();
+		tm.attemptStartHologram();
+
+		MessagesUtil.PLUGIN_RELOAD.msg(cs);
+		if (this.core.getVoidEconomyManager().getCurrentMode() == VoidMode.VOIDCHEST) {
+			final List<String> debug = Lists.newArrayList();
+			debug.add("An attempt to detect invalid material types in shop.yml is initiated...");
+
+			FileConfiguration shop = fm.getShop().getFile();
+			String result = shop.getConfigurationSection("Items").getKeys(false).stream()
+					.filter(name -> !MaterialUtil.fromString(name).isPresent()).collect(Collectors.joining(", "));
+
+			debug.add("Invalid materials: " + (result.isEmpty() ? "none" : result));
+			Utils.debug(this.core, debug);
+		}
+	}
+
 	private void showVoidChests(CommandSender cs) {
 
 		if (!cs.hasPermission("voidchest.list")) {
@@ -165,7 +214,7 @@ public final class VoidCommand implements CommandExecutor {
 		}
 
 		VoidItemManager vim = VoidItemManager.getInstance();
-		final Set<String> voidChestNames = vim.getItemCache().keySet();
+		final Set<String> voidChestNames = vim.getItemCacheMap().keySet();
 
 		String vcList = voidChestNames.isEmpty() ? "none" : String.join(", ", voidChestNames);
 		final Map<String, String> map = Maps.newHashMap();
@@ -190,7 +239,7 @@ public final class VoidCommand implements CommandExecutor {
 				return;
 			}
 			target = (Player) cs;
-			PlayerData data = PlayerDataManager.getInstance().loadPlayerData(target.getUniqueId(), target.getName());
+			PlayerData data = PlayerDataManager.getInstance().loadPlayerData(target, true, false);
 
 			map.put("%voidchests%", String.valueOf(data.getVoidStorages().size()));
 			map.put("%money%",
@@ -261,7 +310,7 @@ public final class VoidCommand implements CommandExecutor {
 			return;
 		}
 
-		final PlayerData data = PlayerDataManager.getInstance().loadPlayerData(player.getUniqueId(), player.getName());
+		final PlayerData data = PlayerDataManager.getInstance().loadPlayerData(player, true, false);
 		final boolean isSend = data.isSendMessage();
 		if (isSend) {
 			MessagesUtil.SELL_MESSAGE_OFF.msg(player);
@@ -269,47 +318,6 @@ public final class VoidCommand implements CommandExecutor {
 			MessagesUtil.SELL_MESSAGE_ON.msg(player);
 		}
 		data.setSendMessage(!isSend);
-	}
-
-	private void reload(final CommandSender cs) {
-
-		if (!cs.hasPermission("voidchest.reload")) {
-			MessagesUtil.NO_PERMISSION.msg(cs);
-			return;
-		}
-		if (this.core.isHdSupport()) {
-			HologramsAPI.getHolograms(this.core).forEach(holo -> holo.delete());
-		}
-
-		CFG.reloadFiles();
-		VoidItemManager.getInstance().cacheItems();
-		final FileManager fm = FileManager.getInstance();
-		MessagesUtil.repairPaths(fm.getMessages());
-
-		Bukkit.getServicesManager().unregisterAll(this.core);
-		this.core.getVoidEconomyManager().hookVoidEcon();
-
-		PlayerDataManager.getInstance().savePlayerDatas(true, true);
-		fm.getPlayerBase().saveFile();
-		PlayerDataManager.getInstance().loadPlayerDatas();
-
-		this.core.attemptStartSaving();
-		this.core.attemptStartPurging();
-
-		MessagesUtil.PLUGIN_RELOAD.msg(cs);
-
-		if (this.core.getVoidEconomyManager().getCurrentMode() == VoidMode.CRAFT_VOIDCHEST) {
-			final List<String> debug = Lists.newArrayList();
-			debug.add("An attempt to detect invalid material types in shop.yml is initiated...");
-
-			FileConfiguration shop = fm.getShop().getFile();
-			String result = shop.getConfigurationSection("Items").getKeys(false).stream()
-					.filter(name -> !MaterialUtil.fromString(name).isPresent()).collect(Collectors.joining(", "));
-
-			debug.add("Invalid materials: " + (result.isEmpty() ? "none" : result));
-			Utils.debug(this.core, debug);
-		}
-
 	}
 
 	private void attemptGiveChest(CommandSender cs, String[] args) {
