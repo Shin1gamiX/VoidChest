@@ -7,7 +7,7 @@ import java.util.Stack;
 
 import me.shin1gamix.voidchest.nbtapi.util.MinecraftVersion;
 
-public class NBTReflectionUtil {
+public final class NBTReflectionUtil {
 
 	public static Object getItemRootNBTTagCompound(final Object nmsitem) {
 		final Class clazz = nmsitem.getClass();
@@ -85,7 +85,7 @@ public class NBTReflectionUtil {
 		return gettoCompount(root, comp) != null;
 	}
 
-	static Object gettoCompount(Object nbttag, NBTCompound comp) {
+	private static Object gettoCompount(Object nbttag, NBTCompound comp) {
 		final Stack<String> structure = new Stack<String>();
 		while (comp.getParent() != null) {
 			structure.add(comp.getName());
@@ -99,9 +99,6 @@ public class NBTReflectionUtil {
 		}
 		return nbttag;
 	}
-
-	
-	
 
 	public static String getContent(final NBTCompound comp, final String key) {
 		Object rootnbttag = comp.getCompound();
@@ -194,19 +191,21 @@ public class NBTReflectionUtil {
 
 		NMS_NBTTAGCOMPOUND(ClassWrapper.NMS_NBTTAGCOMPOUND.getClazz(), (Class<?>[]) new Class[0]);
 		private Constructor<?> construct;
+
 		private ObjectCreator(final Class<?> clazz, final Class<?>[] args) {
 			try {
 				this.construct = clazz.getConstructor(args);
-			} catch (Exception ex) {
-				ex.printStackTrace();
+			} catch (NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
 			}
 		}
 
 		public Object getInstance(final Object... args) {
 			try {
 				return this.construct.newInstance(args);
-			} catch (Exception ex) {
-				ex.printStackTrace();
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				e.printStackTrace();
 				return null;
 			}
 		}

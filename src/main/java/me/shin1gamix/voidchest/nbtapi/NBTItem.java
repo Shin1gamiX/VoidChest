@@ -2,7 +2,7 @@ package me.shin1gamix.voidchest.nbtapi;
 
 import org.bukkit.inventory.ItemStack;
 
-public class NBTItem extends NBTCompound {
+public final class NBTItem extends NBTCompound {
 	private ItemStack bukkitItem;
 
 	private NBTItem(final ItemStack item) {

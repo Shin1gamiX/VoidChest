@@ -12,7 +12,7 @@ import me.shin1gamix.voidchest.VoidChestPlugin;
 import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.ecomanager.customeco.copy.CraftEconomyAbstract;
 
-public class IEssentialsEconomy extends CraftEconomyAbstract {
+public final class IEssentialsEconomy extends CraftEconomyAbstract {
 
 	private final Essentials api;
 

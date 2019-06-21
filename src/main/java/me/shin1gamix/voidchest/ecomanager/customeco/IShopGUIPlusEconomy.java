@@ -11,7 +11,7 @@ import net.brcdev.shopgui.ShopGuiPlugin;
 import net.brcdev.shopgui.shop.Shop;
 import net.brcdev.shopgui.shop.ShopItem;
 
-public class IShopGUIPlusEconomy extends CraftEconomyAbstract {
+public final class IShopGUIPlusEconomy extends CraftEconomyAbstract {
 
 	private final ShopGuiPlugin api = ShopGuiPlugin.getInstance();
 

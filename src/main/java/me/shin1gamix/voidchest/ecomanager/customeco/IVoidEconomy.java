@@ -13,7 +13,7 @@ import me.shin1gamix.voidchest.configuration.FileManager;
 import me.shin1gamix.voidchest.ecomanager.customeco.copy.CraftEconomyAbstract;
 import me.shin1gamix.voidchest.utilities.MaterialUtil;
 
-public class IVoidEconomy extends CraftEconomyAbstract {
+public final class IVoidEconomy extends CraftEconomyAbstract {
 
 	public IVoidEconomy(final VoidChestPlugin core) {
 		super(core, true, core.getDescription());

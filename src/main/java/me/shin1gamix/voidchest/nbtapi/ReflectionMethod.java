@@ -1,5 +1,6 @@
 package me.shin1gamix.voidchest.nbtapi;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.bukkit.inventory.ItemStack;
@@ -107,8 +108,8 @@ public enum ReflectionMethod {
 	public Object run(final Object target, final Object... args) {
 		try {
 			return this.method.invoke(target, args);
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
