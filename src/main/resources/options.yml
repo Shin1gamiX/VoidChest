@@ -16,6 +16,11 @@ Sounds:
   voidchest-break: ANVIL_BREAK
 
 
+# Available hologram support from other plugins: HolographicDisplays
+# The amount of ticks the update should happen. Default is 5 (~0.25 seconds).
+hologram-support:
+  enabled: true
+  update-interval: 5
 
 # These messages are sent every time the player does a certain action.
 # An example would be whenever the player breaks a voidchest, places etc.
@@ -43,6 +48,7 @@ Messages:
 # If the default amount doesn't exist, the limit will automatically be 5.
 Player:
   voidchest:
+    place-near-other: false
     limit:
       default: 5
       vip: 10
@@ -58,6 +64,26 @@ Hologram:
   interval: 5
 
 
+# Certain timings are automatically converted into d,h,m,s.
+# For example, charge time, hologram sell interval, etc.
+# By changing these, you can modify the text to your liking.
+Time-Format:
+  second: second
+  seconds: seconds
+  minute: minute
+  minutes: minutes
+  hour: hour
+  hours: hours
+  day: day
+  days: days
+  invalid-time: invalid time
+
+
+Charge:
+  No-Fuel:
+    hologram: "need fuel"
+    
+
 
 # The amount of seconds the plugin should attempt to save all voidchests in file.
 # This is to ensure that in case of a crash, voidchest (statistics and data) are not lost.
@@ -69,8 +95,8 @@ Hologram:
 #
 # The interval is being run in seconds.
 Saving:
-  interval: 90
-  enabled: false
+  interval: 300
+  enabled: true
 
 
 
