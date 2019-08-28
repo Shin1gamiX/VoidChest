@@ -6,5 +6,4 @@ I decide otherwise). If you plan on forking this, be aware that you will be usin
 
 # Contact Me
 https://discordapp.com/invite/TdV4GbJ
-
 https://linktr.ee/Shin1gamiX
