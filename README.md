@@ -10,6 +10,7 @@ https://linktr.ee/Shin1gamiX
 
 # Purchase VoidChest At
 https://www.spigotmc.org/resources/65576/
+
 https://www.mc.mk/r/10148/
 
 The resource gets updated for bug fixes and for introducing new features quite regularly.
