@@ -1,10 +1,13 @@
 # VoidChest
 The project here is **outdated** and there will be no further updates (unless I decide otherwise). If you plan on forking this, be aware that you will be using an old version of voidchest (~1.0) where as there is a newer one available. For further information, check the contact section below.
 
+# Wiki
+The wiki of this repository gets updated regularly for the most latest and sometimes dev versions of voidchest.
+
 # Contact Me
 Discord Server: https://discordapp.com/invite/TdV4GbJ
 
-Discord Username: **Shin1gamiX#0001**
+Discord Username: **Shin1gamiX#5287**
 
 Linktr: https://linktr.ee/Shin1gamiX 
 
